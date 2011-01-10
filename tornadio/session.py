@@ -107,12 +107,15 @@ class SessionManager(object):
                 top._item_deleted()
 
 def test():
+    tot_t = 0
+    tot_c = 0
+
     while True:
         for j in xrange(0, 1000):
             op = randint(0, 5)
 
             if op == 0:
-                SessionManager.create(randint(1, 10))
+                SessionManager.create(30)
             elif op == 1 and SessionManager._queue:
                 idx = randint(0, len(SessionManager._queue) - 1)
                 item = SessionManager._queue[idx]
@@ -128,8 +131,10 @@ def test():
         SessionManager.expire(t)
 
         delta = clock() - start
+        tot_t += delta
+        tot_c += 1
 
-        print 'Queue size: %d, %f' % (len(SessionManager._queue), delta)
+        print 'Queue size: %d, %f, %f' % (len(SessionManager._queue), delta, tot_t/tot_c)
 
         nl = []
         idx = 0
