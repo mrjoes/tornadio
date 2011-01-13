@@ -23,16 +23,10 @@ class TornadioWebSocketHandler(WebSocketHandler):
 
     def on_message(self, message):
         logging.debug('on_message')
-
-        for m in proto.decode(message):
-            if m[0] == proto.FRAME or m[0] == proto.JSON:
-                self.handler.on_message(m[1])
-            elif m[0] == proto.HEARTBEAT:
-                logging.debug('Heartbeat')
+        self.handler.raw_message(message)
 
     def on_close(self):
         logging.debug('on_close')
-
         self.handler.on_close()
 
     def send(self, message):

@@ -1,10 +1,11 @@
 from tornado.web import RequestHandler, HTTPError
 
-from tornadio import persistent
+from tornadio import persistent, polling
 
 PROTOCOLS = {
     'websocket': persistent.TornadioWebSocketHandler,
-    'flashsocket': persistent.TornadioFlashSocketHandler
+    'flashsocket': persistent.TornadioFlashSocketHandler,
+    'xhr-polling': polling.TornadioXHRPollingSocketHandler,
     }
 
 class SocketRouterBase(RequestHandler):

@@ -1,3 +1,5 @@
+from tornadio import proto
+
 class SocketConnection(object):
     def __init__(self, protocol):
         self._protocol = protocol
@@ -16,3 +18,10 @@ class SocketConnection(object):
 
     def close(self):
         self._protocol.close()
+
+    def _raw_message(self, message):
+        for m in proto.decode(message):
+            if m[0] == proto.FRAME or m[0] == proto.JSON:
+                self.on_message(m[1])
+            elif m[0] == proto.HEARTBEAT:
+                logging.debug('Heartbeat')
