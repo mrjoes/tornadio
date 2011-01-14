@@ -4,9 +4,9 @@ from hashlib import md5
 from random import random, randint
 
 class Session(object):
-    def __init__(self, session_id, expiry=None, on_delete=None):
+    def __init__(self, session_id, item, expiry=None, on_delete=None):
         self.session_id = session_id
-        self._items = dict()
+        self.item = item
         self.promoted = None
         self.expiry = expiry
         self.on_delete = on_delete
@@ -23,12 +23,6 @@ class Session(object):
         if self.on_delete is not None:
             self.on_delete()
 
-    def get(self, key, default=None):
-        return self._items.get(key, default)
-
-    def set(self, key, value):
-        self._items[key] = value
-
     def __cmp__(self, other):
         return cmp(self.expiry_date, other.expiry_date)
 
@@ -36,16 +30,17 @@ class Session(object):
         return '%f %s %d' % (getattr(self, 'expiry_date', -1), self.session_id, self.promoted or 0)
 
 class SessionContainer(object):
-    _items = dict()
-    _queue = []
+    def __init__(self):
+        self._items = dict()
+        self._queue = []
 
     def _random_key(self):
         m = md5()
         m.update('%s%s' % (random(), time()))
         return m.hexdigest()
 
-    def create(self, expiry=None, on_delete=None):
-        session = Session(self._random_key(), expiry, on_delete)
+    def create(self, item, expiry=None, on_delete=None):
+        session = Session(self._random_key(), item, expiry, on_delete)
         self._items[session.session_id] = session
 
         if expiry is not None:

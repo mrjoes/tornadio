@@ -19,7 +19,7 @@ class SocketConnection(object):
     def close(self):
         self._protocol.close()
 
-    def _raw_message(self, message):
+    def raw_message(self, message):
         for m in proto.decode(message):
             if m[0] == proto.FRAME or m[0] == proto.JSON:
                 self.on_message(m[1])

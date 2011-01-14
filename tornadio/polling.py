@@ -2,24 +2,58 @@ import logging
 
 from tornado.web import RequestHandler, HTTPError, asynchronous
 
-from tornadio import session
+from tornadio import session, pollingsession
 
 class TornadioPollingHandlerBase(RequestHandler):
-    def __init__(self, conn, session_id):
-        self.conn = conn
+    _sessions = session.SessionContainer()
 
-        if session_id is None:
+    def __init__(self, handler, session_id):
+        self.handler = handler
+
+        print 'Polling: %s' % session_id
+
+        if not session_id:
             # TODO: Configurable session expiration
-            self.worker = PollingWorkerFactory.create(conn.handler)
+            self.session = self._create_session(handler.connection)
         else:
-            self.worker = PollingWorkerFactory.get(session_id)
+            self.session = self._get_session(session_id)
 
-            if self.worker is None:
+            if self.session is None:
                 # TODO: Send back disconnect message?
                 raise HTTPError(401, 'Invalid session')
 
-        super(TornadioPollingHandlerBase, self).__init__(conn.application,
-                                                         conn.request)
+        super(TornadioPollingHandlerBase, self).__init__(handler.application,
+                                                         handler.request)
+
+    @classmethod
+    def _session_expired(cls, session):
+        session.item.on_close()
+
+    @classmethod
+    def _create_session(cls, connection):
+        worker = pollingsession.PollingSession(connection)
+
+        # TODO: Configurable timeouts
+        session = cls._sessions.create(worker,
+                                       expiry=15,
+                                       on_delete=cls._session_expired)
+
+        # TODO: Fix me - move to worker class
+        # Send session id
+        worker.send(session.session_id)
+
+        worker.on_open()
+
+        return worker
+
+    @classmethod
+    def _get_session(cls, session_id):
+        session = cls._sessions.get(session_id)
+
+        if session is None:
+            return None
+
+        return session.item
 
     @asynchronous
     def get(self, *args, **kwargs):
@@ -33,8 +67,8 @@ class TornadioPollingHandlerBase(RequestHandler):
         "Public send() function"
         raise NotImplemented()
 
-    def _write(self, message):
-        "Called by the session when message is available"
+    def data_available(self, data_available):
+        "Called by the session when some data is available"
         raise NotImplemented()
 
     @asynchronous
@@ -66,26 +100,37 @@ class TornadioPollingHandlerBase(RequestHandler):
 class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
     @asynchronous
     def get(self, *args, **kwargs):
-        self.worker.set_handler(self.handler)
-        self.worker.flush()
+        print 'GET %s, %s' % (args, kwargs)
+
+        if not self.session.set_handler(self):
+            print 'Failed to set handler'
+            # TODO: Error logging
+            raise HTTPError(401, 'Forbidden')
+
+        self.session.flush()
 
     @asynchronous
     def post(self, *args, **kwargs):
         self.set_header('Content-Type', 'text/plain')
         data = self.get_argument('data')
         if not self.preflight():
+            print 'Unauthorized'
             raise HTTPError(401, 'unauthorized')
 
         # TODO: async
-        self.worker.on_message(data.decode('utf-8', 'replace'))
+        self.session.raw_message(data.decode('utf-8', 'replace'))
 
         self.write('ok')
         self.finish()
 
     def on_connection_close(self):
-        self.worker.remove_handler(self)
+        self.session.remove_handler(self)
 
-    def _write(self, message):
+    # TODO: Async
+    def data_available(self, worker):
+        # Encode message
+        message = self.session.dump_messages()
+
         self.preflight()
         self.set_header("Content-Type", "text/plain; charset=UTF-8")
         self.set_header("Content-Length", len(message))
@@ -93,4 +138,4 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         self.finish()
 
         # Notify session that there's no handler waiting
-        self.worker.remove_handler(self)
+        self.session.remove_handler(self)

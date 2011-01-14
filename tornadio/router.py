@@ -9,7 +9,7 @@ PROTOCOLS = {
     }
 
 class SocketRouterBase(RequestHandler):
-    _handler = None
+    _connection = None
     _route = None
 
     def _execute(self, transforms, *args, **kwargs):
@@ -42,16 +42,16 @@ class SocketRouterBase(RequestHandler):
             raise HttpError(400)
 
     @property
-    def handler(self):
-        return self._handler
+    def connection(self):
+        return self._connection
 
     @classmethod
     def route(cls):
         return cls._route
 
     @classmethod
-    def _initialize(cls, handler, resource, extraRE=None, extraSep=None):
-        cls._handler = handler
+    def _initialize(cls, connection, resource, extraRE=None, extraSep=None):
+        cls._connection = connection
 
         # Copied from SocketTornad.IO with minor formatting
         if extraRE:

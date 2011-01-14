@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script src="http://cdn.socket.io/stable/socket.io.js"></script>
+  <script>
+  jQuery(function() {
+    var s = new io.Socket("localhost", {port: 8001, transports:['xhr-polling']});
+    s.connect();
+
+    function getPrintableDate(date) {
+      return date.getFullYear().toString() + '-' +
+         (date.getMonth()+1).toString() + '-' +
+         date.getDate().toString() + ' ' +
+         date.getHours().toString() + ':' +
+         date.getMinutes().toString() + ':' +
+         date.getSeconds().toString() + '.' +
+         date.getMilliseconds().toString();
+    }
+
+    s.addEvent('message', function(data) {
+      var ping = new Date(data.ping);
+      var server = new Date(data.server);
+      var now = new Date();
+
+      $('#res').html('Sent:   ' + getPrintableDate(ping) + '<br/>' +
+                     'Recv:   ' + getPrintableDate(now) + '<br/>' +
+                     'Server: ' + getPrintableDate(server) + '<br/>' +
+                     'Delta:  ' + (now.getTime() - ping.getTime()).toString() + '<br/>' +
+                     'SrDelta:' + (server.getTime() - ping.getTime()).toString()
+       );
+
+      //sendPing();
+    });
+
+    function sendPing() {
+      var msg = { ping: getPrintableDate(new Date()) };
+      s.send(msg);
+      return false;
+    }
+
+    $('a').click(sendPing);
+  });
+  </script>
+</head>
+<body>
+  <a href="#">Start ping</a>
+  <div id="res" />
+</body>
+</html>

@@ -1,33 +1,25 @@
-import logging
-
 from tornado.websocket import WebSocketHandler
 
 from tornadio import proto
 
 class TornadioWebSocketHandler(WebSocketHandler):
-    def __init__(self, conn, session_id):
+    def __init__(self, handler, session_id):
         logging.debug('Initializing WebSocket handler...')
 
-        self.conn = conn
-        self.handler = conn.handler(self)
-
-        print conn.application
-        print conn.request
+        self.handler = conn
+        self.connection = handler.connection(self)
 
         super(TornadioWebSocketHandler, self).__init__(conn.application,
                                                        conn.request)
 
     def open(self, *args, **kwargs):
-        logging.debug('on_open')
-        self.handler.on_open(*args, **kwargs)
+        self.connection.on_open(*args, **kwargs)
 
     def on_message(self, message):
-        logging.debug('on_message')
-        self.handler.raw_message(message)
+        self.connection.raw_message(message)
 
     def on_close(self):
-        logging.debug('on_close')
-        self.handler.on_close()
+        self.connection.on_close()
 
     def send(self, message):
         self.async_callback(self.write_message)(proto.encode(message))
@@ -37,4 +29,3 @@ def TornadioFlashSocketHandler(TornadioWebSocketHandler):
         logging.debug('Initializing FlashSocket handler...')
 
         super(TornadioFlashSocketHandler, self).__init__(conn, session_id)
-
