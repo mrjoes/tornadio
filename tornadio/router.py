@@ -6,6 +6,7 @@ PROTOCOLS = {
     'websocket': persistent.TornadioWebSocketHandler,
     'flashsocket': persistent.TornadioFlashSocketHandler,
     'xhr-polling': polling.TornadioXHRPollingSocketHandler,
+    'xhr-multipart': polling.TornadioXHRMultipartSocketHandler,
     }
 
 class SocketRouterBase(RequestHandler):

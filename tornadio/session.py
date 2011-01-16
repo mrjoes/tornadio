@@ -4,12 +4,11 @@ from hashlib import md5
 from random import random, randint
 
 class Session(object):
-    def __init__(self, session_id, item, expiry=None, on_delete=None):
+    def __init__(self, session_id, expiry=None):
         self.session_id = session_id
-        self.item = item
         self.promoted = None
         self.expiry = expiry
-        self.on_delete = on_delete
+
         if self.expiry is not None:
             self.expiry_date = time() + self.expiry
 
@@ -17,11 +16,8 @@ class Session(object):
         if self.expiry is not None:
             self.promoted = time() + self.expiry
 
-    def _item_deleted(self):
-        self.promoted = -1
-
-        if self.on_delete is not None:
-            self.on_delete()
+    def on_delete(self):
+        pass
 
     def __cmp__(self, other):
         return cmp(self.expiry_date, other.expiry_date)
@@ -39,8 +35,12 @@ class SessionContainer(object):
         m.update('%s%s' % (random(), time()))
         return m.hexdigest()
 
-    def create(self, item, expiry=None, on_delete=None):
-        session = Session(self._random_key(), item, expiry, on_delete)
+    def create(self, session, expiry=None, **kwargs):
+        kwargs['session_id'] = self._random_key()
+        kwargs['expiry'] = expiry
+
+        session = session(**kwargs)
+
         self._items[session.session_id] = session
 
         if expiry is not None:
@@ -48,20 +48,16 @@ class SessionContainer(object):
 
         return session
 
-    def get(self, session_id, promote=True):
-        session = self._items.get(session_id, None)
-
-        if session is not None and promote:
-            session.promote()
-
-        return session
+    def get(self, session_id):
+        return self._items.get(session_id, None)
 
     def remove(self, session_id):
         session = self._items.get(session_id, None)
 
         if session is not None:
+            self._items[session].promoted = -1
+            session.on_delete()
             del self._items[session_id]
-            session._item_deleted()
             return True
 
         return False
@@ -85,6 +81,11 @@ class SessionContainer(object):
             # Pop item from the stack
             top = heappop(self._queue)
 
+            # Give chance to reschedule
+            if not top.promoted or top.promoted < current_time:
+                top.promoted = -1
+                top.on_delete()
+
             # If item is promoted and expiration time somewhere in future
             # just reschedule it
             if top.promoted is not None and top.promoted > current_time:
@@ -92,9 +93,7 @@ class SessionContainer(object):
                 top.promoted = None
                 heappush(self._queue, top)
             else:
-                # Otherwise - remove session
                 del self._items[top.session_id]
-                top._item_deleted()
 
 def test():
     tot_t = 0

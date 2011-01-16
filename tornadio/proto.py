@@ -48,6 +48,9 @@ def decode(data):
 
         if msg_data.startswith(JSON):
             msg_data = json.loads(msg_data[3:])
+        elif msg_data.startswith(HEARTBEAT):
+            msg_type = HEARTBEAT
+            msg_data = msg_data[3:]
 
         messages.append((msg_type, msg_data))
 
