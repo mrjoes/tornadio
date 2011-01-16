@@ -23,9 +23,14 @@ class PollingSession(session.Session):
         # Notify that channel was opened
         self.on_open(*args, **kwargs)
 
-    def on_delete(self):
-        if self.handler is not None:
+    def on_delete(self, forced):
+        print '--- Expiring %s (%s)' % (self.session_id, forced)
+
+        if not forced and self.handler is not None:
+            print '--- Promoting'
             self.promote()
+        else:
+            self.on_close()
 
     def set_handler(self, handler):
         if self.handler is not None:

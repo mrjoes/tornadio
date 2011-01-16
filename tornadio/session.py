@@ -16,7 +16,8 @@ class Session(object):
         if self.expiry is not None:
             self.promoted = time() + self.expiry
 
-    def on_delete(self):
+    def on_delete(self, forced):
+        print '!!!! On Delete'
         pass
 
     def __cmp__(self, other):
@@ -56,22 +57,28 @@ class SessionContainer(object):
 
         if session is not None:
             self._items[session].promoted = -1
-            session.on_delete()
+            session.on_delete(True)
             del self._items[session_id]
             return True
 
         return False
 
     def expire(self, current_time=None):
+        print '--- Expiring sessions...'
+
         if not self._queue:
             return
 
         if current_time is None:
             current_time = time()
 
+        print '!!! Current time: %s' % current_time
+
         while self._queue:
             # Top most item is not expired yet
             top = self._queue[0]
+
+            print top
 
             # Early exit if item was not promoted and its expiration time
             # is greater than now.
@@ -81,15 +88,21 @@ class SessionContainer(object):
             # Pop item from the stack
             top = heappop(self._queue)
 
+            need_reschedule = (top.promoted is not None
+                               and top.promoted > current_time)
+
             # Give chance to reschedule
-            if not top.promoted or top.promoted < current_time:
-                top.promoted = -1
-                top.on_delete()
+            if not need_reschedule:
+                top.promoted = None
+                top.on_delete(False)
+
+                need_reschedule = (top.promoted is not None
+                                   and top.promoted > current_time)
 
             # If item is promoted and expiration time somewhere in future
             # just reschedule it
-            if top.promoted is not None and top.promoted > current_time:
-                top.current_time = top.promoted
+            if need_reschedule:
+                top.expiry_date = top.promoted
                 top.promoted = None
                 heappush(self._queue, top)
             else:

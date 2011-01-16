@@ -10,6 +10,9 @@ from tornadio import session, pollingsession
 class TornadioPollingHandlerBase(RequestHandler):
     _sessions = session.SessionContainer()
 
+    # TODO: Configurable callback timeout
+    _session_cleanup = ioloop.PeriodicCallback(_sessions.expire, 30000).start()
+
     io_loop = ioloop.IOLoop.instance()
 
     def __init__(self, handler, session_id):
@@ -112,13 +115,13 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         self.write('ok')
         self.finish()
 
-    def _abort(self):
+    def _detach(self):
         self.session.remove_handler(self)
         self.session = None
 
     def on_connection_close(self):
         print 'Connection closed'
-        self._abort()
+        self._detach()
 
     # TODO: Async
     def data_available(self, worker):
@@ -132,7 +135,7 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         self.finish()
 
         # Detach connection
-        self._abort()
+        self._detach()
 
 class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
     @asynchronous

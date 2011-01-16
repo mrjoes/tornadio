@@ -17,16 +17,17 @@ class ChatConnection(tornadio.SocketConnection):
     participants = set()
 
     def on_open(self, *args, **kwargs):
+        print '!!! Open'
         self.participants.add(self)
         self.send("Welcome!")
 
     def on_message(self, message):
-        print 'Msg %s' % message
+        print '!!! Msg %s' % message
         for p in self.participants:
             p.send(message)
 
     def on_close(self):
-        print 'Close'
+        print '!!! Close'
         self.participants.remove(self)
         for p in self.participants:
             p.send("A user has left.")
