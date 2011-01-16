@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+    tornadio.router
+    ~~~~~~~~~~~~~~~
+
+    Implements handy wrapper to start FlashSocket server (if FlashSocket
+    protocol is enabled). Shamesly borrowed from the SocketTornad.IO project.
+
+    :copyright: (c) 2011 by the Serge S. Koval, see AUTHORS for more details.
+    :license: Apache, see LICENSE for more details.
+"""
 import logging
 
 from tornado import ioloop

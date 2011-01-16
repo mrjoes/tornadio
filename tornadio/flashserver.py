@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+    tornadio.flashserver
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Flash Socket policy server implementation. Merged with minor modifications
+    from the SocketTornad.IO project.
+
+    :copyright: (c) 2011 by the Serge S. Koval, see AUTHORS for more details.
+    :license: Apache, see LICENSE for more details.
+"""
 from __future__ import with_statement
 
 import socket
@@ -8,7 +19,6 @@ from tornado import ioloop, iostream
 
 class FlashPolicyServer(object):
     """Flash Policy server, listens on port 843 by default (otherwise useless)"""
-
     def __init__(self, port=843, policy_file='flashpolicy.xml'):
         self.policy_file = policy_file
         self.port = port

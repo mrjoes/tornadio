@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+    tornadio.router
+    ~~~~~~~~~~~~~~~
+
+    Simple heapq-based session implementation with sliding expiration window
+    support.
+
+    :copyright: (c) 2011 by the Serge S. Koval, see AUTHORS for more details.
+    :license: Apache, see LICENSE for more details.
+"""
+
 from heapq import heappush, heappop, heapify
 from time import time, sleep, clock
 from hashlib import md5
@@ -17,14 +29,15 @@ class Session(object):
             self.promoted = time() + self.expiry
 
     def on_delete(self, forced):
-        print '!!!! On Delete'
         pass
 
     def __cmp__(self, other):
         return cmp(self.expiry_date, other.expiry_date)
 
     def __repr__(self):
-        return '%f %s %d' % (getattr(self, 'expiry_date', -1), self.session_id, self.promoted or 0)
+        return '%f %s %d' % (getattr(self, 'expiry_date', -1),
+                             self.session_id,
+                             self.promoted or 0)
 
 class SessionContainer(object):
     def __init__(self):
@@ -64,15 +77,11 @@ class SessionContainer(object):
         return False
 
     def expire(self, current_time=None):
-        print '--- Expiring sessions...'
-
         if not self._queue:
             return
 
         if current_time is None:
             current_time = time()
-
-        print '!!! Current time: %s' % current_time
 
         while self._queue:
             # Top most item is not expired yet
@@ -108,6 +117,7 @@ class SessionContainer(object):
             else:
                 del self._items[top.session_id]
 
+# TODO: Move me outside
 def test():
     tot_t = 0
     tot_c = 0

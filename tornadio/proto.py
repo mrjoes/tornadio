@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+    tornadio.proto
+    ~~~~~~~~~~~~~~
+
+    Socket.IO 0.6.x protocol codec.
+
+    :copyright: (c) 2011 by the Serge S. Koval, see AUTHORS for more details.
+    :license: Apache, see LICENSE for more details.
+"""
 try:
     import simplejson as json
 except:
@@ -8,14 +18,19 @@ HEARTBEAT = '~h~'
 JSON = '~j~'
 
 def encode(message):
+    """Encode message to the socket.io wire format.
+
+    1. If message is list, it will encode each separate list item as a message
+    2. If message is a unicode or ascii string, it will be encoded as is
+    3. If message some arbitrary python object or a dict, it will be JSON
+    encoded
+    """
     encoded = ''
     if isinstance(message, list):
         for m in message:
             encoded += encode(m)
-    elif not isinstance(message, (unicode, str)) and isinstance(message, (object, dict)):
-        """
-        Strings are objects... messy test.
-        """
+    elif (not isinstance(message, (unicode, str))
+          and isinstance(message, (object, dict))):
         if message is not None:
             encoded += encode('~j~' + json.dumps(message, use_decimal=True))
     else:
@@ -24,9 +39,14 @@ def encode(message):
     return encoded
 
 def decode(data):
+    """Decode socket.io messages
+
+    Returns message tuples, first item in a tuple is message type (see
+    message declarations in the beginning of the file) and second item
+    is decoded message.
+    """
     messages = []
 
-    print data
     idx = 0
 
     while data[idx:idx+3] == FRAME:

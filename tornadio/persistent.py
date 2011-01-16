@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+    tornadio.persistent
+    ~~~~~~~~~~~~~~~~~~~
+
+    Persistent transport implementations.
+
+    :copyright: (c) 2011 by the Serge S. Koval, see AUTHORS for more details.
+    :license: Apache, see LICENSE for more details.
+"""
 import logging
 
 from tornado.websocket import WebSocketHandler
@@ -5,6 +15,8 @@ from tornado.websocket import WebSocketHandler
 from tornadio import proto
 
 class TornadioWebSocketHandler(WebSocketHandler):
+    """WebSocket handler.
+    """
     def __init__(self, handler, session_id):
         logging.debug('Initializing WebSocket handler...')
 
@@ -24,6 +36,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
 
     def on_close(self):
         self.connection.on_close()
+        self.connection.is_closed = True
 
         self.connection.stop_heartbeat()
 
