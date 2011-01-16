@@ -1,5 +1,6 @@
 import time
 import logging
+import json
 
 from tornado import ioloop
 from tornado.web import RequestHandler, HTTPError, asynchronous
@@ -182,6 +183,61 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
         self.write("Content-Type: text/plain; charset=us-ascii\n\n")
         self.write(message + '\n')
         self.write('--socketio\n')
+        self.flush()
+
+        # TODO: If we're still connected - reset heartbeat
+        #if self.request.connection.stream.socket:
+        #    self.session.reset_heartbeat()
+
+class TornadioXHRHtmlFileSocketHandler(TornadioPollingHandlerBase):
+    @asynchronous
+    def get(self, *args, **kwargs):
+        if not self.session.set_handler(self):
+            print 'Failed to set handler'
+            # TODO: Error logging
+            raise HTTPError(401, 'Forbidden')
+
+        print 'HTML FILE'
+
+        self.set_header('Content-Type', 'text/html')
+        self.set_header('Connection', 'keep-alive')
+        self.set_header('Transfer-Encoding', 'chunked')
+        self.write('<html><body>%s' % (' ' * 244))
+
+        # Dump any queued messages
+        self.session.flush()
+
+        # We need heartbeats
+        self.session.reset_heartbeat()
+
+    @asynchronous
+    def post(self, *args, **kwargs):
+        self.set_header('Content-Type', 'text/plain')
+
+        data = self.get_argument('data')
+
+        if not self.preflight():
+            print 'Unauthorized'
+            raise HTTPError(401, 'unauthorized')
+
+        # TODO: async
+        self.session.raw_message(data.decode('utf-8', 'replace'))
+
+        self.write('ok')
+        self.finish()
+
+    def on_connection_close(self):
+        self.session.stop_heartbeat()
+        self.session.remove_handler(self)
+
+    # TODO: Async
+    def data_available(self, worker):
+        # Encode message
+        message = self.session.dump_messages()
+
+        self.write(
+            '<script>parent.s_(%s), document);</script>' % json.dumps(message)
+            )
         self.flush()
 
         # TODO: If we're still connected - reset heartbeat

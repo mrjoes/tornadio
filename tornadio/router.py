@@ -7,6 +7,7 @@ PROTOCOLS = {
     'flashsocket': persistent.TornadioFlashSocketHandler,
     'xhr-polling': polling.TornadioXHRPollingSocketHandler,
     'xhr-multipart': polling.TornadioXHRMultipartSocketHandler,
+    'htmlfile': polling.TornadioXHRHtmlFileSocketHandler,
     }
 
 class SocketRouterBase(RequestHandler):

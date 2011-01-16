@@ -6,7 +6,7 @@
 <script>
     window.onload = function() {
 
-        var s = new io.Socket("localhost", {port: 8001, transports:['websocket']});
+        var s = new io.Socket("localhost", {port: 8001, transports:['htmlfile']});
         s.connect();
 
         s.addEvent('connect', function() {
