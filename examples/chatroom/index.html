@@ -6,7 +6,7 @@
 <script>
     window.onload = function() {
 
-        var s = new io.Socket("localhost", {port: 8888, transports:['xhr-polling']});
+        var s = new io.Socket("localhost", {port: 8001, transports:['xhr-polling']});
         s.connect();
 
         s.addEvent('connect', function() {
