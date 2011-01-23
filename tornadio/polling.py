@@ -10,7 +10,10 @@
 """
 import time
 import logging
-import json
+try:
+    import simplejson as json
+except:
+    import json
 
 from tornado import ioloop
 from tornado.web import RequestHandler, HTTPError, asynchronous
