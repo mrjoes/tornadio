@@ -48,5 +48,8 @@ application = tornado.web.Application(
 )
 
 if __name__ == "__main__":
+    import logging
+    logging.getLogger().setLevel(logging.DEBUG)
+
     tornadio.server.SocketServer(application)
 

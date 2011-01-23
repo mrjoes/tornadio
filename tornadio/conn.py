@@ -90,7 +90,7 @@ class SocketConnection(object):
         self.stop_heartbeat()
 
         # TODO: Configurable heartbeats
-        self._heartbeat_timer = periodic.Callback(self._heartbeat, 15000)
+        self._heartbeat_timer = periodic.Callback(self._heartbeat, 12000)
         self._heartbeat_timer.start()
 
     def stop_heartbeat(self):

@@ -156,8 +156,10 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         if not self.preflight():
             raise HTTPError(401, 'unauthorized')
 
+        print data
+
         # TODO: async
-        self.session.raw_message(data.decode('utf-8', 'replace'))
+        self.session.raw_message(data)
 
         self.write('ok')
         self.finish()
@@ -218,7 +220,7 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
             raise HTTPError(401, 'unauthorized')
 
         # TODO: async
-        self.session.raw_message(data.decode('utf-8', 'replace'))
+        self.session.raw_message(data)
 
         self.write('ok')
         self.finish()
@@ -276,7 +278,7 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
             raise HTTPError(401, 'unauthorized')
 
         # TODO: async
-        self.session.raw_message(data.decode('utf-8', 'replace'))
+        self.session.raw_message(data)
 
         self.write('ok')
         self.finish()
