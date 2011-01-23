@@ -30,13 +30,13 @@ class TornadioWebSocketHandler(WebSocketHandler):
         self.connection.reset_heartbeat()
 
         # Fix me: websocket is dropping connection if we don't send first
-        # message which is session_id
+        # message
         self.send('no_session')
 
         self.connection.on_open(*args, **kwargs)
 
     def on_message(self, message):
-        logging.debug('Message: %s' % message)
+        logging.debug('Message: %s', message)
         self.connection.raw_message(message)
 
     def on_close(self):
@@ -48,7 +48,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
         self.connection.stop_heartbeat()
 
     def send(self, message):
-        logging.debug('Send: %s (%s)' % (message, self))
+        logging.debug('Send: %s (%s)', message, self)
 
         self.async_callback(self.write_message)(proto.encode(message))
 

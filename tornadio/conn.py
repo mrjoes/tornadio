@@ -77,11 +77,11 @@ class SocketConnection(object):
     def raw_message(self, message):
         """Called when raw message was received by underlying transport protocol
         """
-        for m in proto.decode(message):
-            if m[0] == proto.FRAME or m[0] == proto.JSON:
-                self.on_message(m[1])
-            elif m[0] == proto.HEARTBEAT:
-                # TODO: Verify
+        for msg in proto.decode(message):
+            if msg[0] == proto.FRAME or msg[0] == proto.JSON:
+                self.on_message(msg[1])
+            elif msg[0] == proto.HEARTBEAT:
+                # TODO: Verify incoming heartbeats
                 logging.debug('Incoming Heartbeat')
 
     # Heartbeat management
@@ -100,10 +100,12 @@ class SocketConnection(object):
             self._heartbeat_timer = None
 
     def delay_heartbeat(self):
+        """Delay heartbeat sending"""
         if self._heartbeat_timer is not None:
             self._heartbeat_delay = self._heartbeat_timer.calculate_next_run()
 
     def send_heartbeat(self):
+        """Send heartbeat message to the client"""
         self._heartbeats += 1
         self.send('~h~%d' % self._heartbeats)
 

@@ -10,7 +10,7 @@
 """
 try:
     import simplejson as json
-except:
+except ImportError:
     import json
 
 FRAME = '~m~'

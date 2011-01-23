@@ -18,7 +18,8 @@ import functools
 from tornado import ioloop, iostream
 
 class FlashPolicyServer(object):
-    """Flash Policy server, listens on port 843 by default (otherwise useless)"""
+    """Flash Policy server, listens on port 843 by default (useless otherwise)
+    """
     def __init__(self, port=843, policy_file='flashpolicy.xml'):
         self.policy_file = policy_file
         self.port = port
@@ -34,6 +35,7 @@ class FlashPolicyServer(object):
         self.io_loop.add_handler(sock.fileno(), callback, self.io_loop.READ)
 
     def connection_ready(self, sock, fd, events):
+        """Connection ready callback"""
         while True:
             try:
                 connection, address = sock.accept()
@@ -46,9 +48,9 @@ class FlashPolicyServer(object):
             self.stream.read_bytes(22, self._handle_request)
 
     def _handle_request(self, request):
+        """Send policy response"""
         if request != '<policy-file-request/>':
             self.stream.close()
         else:
-            with open(self.policy_file, 'rb') as fh:
-                self.stream.write(fh.read() + '\0')
-
+            with open(self.policy_file, 'rb') as file_handle:
+                self.stream.write(file_handle.read() + '\0')

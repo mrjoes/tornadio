@@ -54,10 +54,10 @@ class SocketRouterBase(RequestHandler):
                 handler._execute(transforms, *extra, **kwargs)
             else:
                 raise Exception('Handler for protocol "%s" is not available' %
-                                prot_name)
-        except ValueError, e:
+                                proto_name)
+        except ValueError:
             # TODO: Debugging
-            raise HttpError(400)
+            raise HTTPError(400)
 
     @property
     def connection(self):
@@ -70,7 +70,7 @@ class SocketRouterBase(RequestHandler):
         return cls._route
 
     @classmethod
-    def _initialize(cls, connection, resource, extraRE=None, extraSep=None):
+    def initialize(cls, connection, resource, extra_re=None, extra_sep=None):
         """Initialize class with the connection and resource.
 
         Does all behind the scenes work to setup routes, etc. Partially
@@ -79,29 +79,29 @@ class SocketRouterBase(RequestHandler):
         cls._connection = connection
 
         # Copied from SocketTornad.IO with minor formatting
-        if extraRE:
-            if extraRE[0] != '(?P<extra>':
-                if extraRE[0] == '(':
-                    extraRE = r'(?P<extra>%s)' % extraRE
+        if extra_re:
+            if extra_re[0] != '(?P<extra>':
+                if extra_re[0] == '(':
+                    extra_re = r'(?P<extra>%s)' % extra_re
                 else:
-                    extraRE = r"(?P<extra>%s)" % extraRE
-            if extraSep:
-                extraRE = extraSep + extraRE
+                    extra_re = r"(?P<extra>%s)" % extra_re
+            if extra_sep:
+                extra_re = extra_sep + extra_re
         else:
-            extraRE = "(?P<extra>)"
+            extra_re = "(?P<extra>)"
 
-        protoRE = "(%s)" % "|".join(PROTOCOLS.keys())
+        proto_re = "(%s)" % "|".join(PROTOCOLS.keys())
 
         cls._route = (r"/(?P<resource>%s)%s/"
                       "(?P<protocol>%s)/?"
                       "(?P<session_id>[0-9a-zA-Z]*)/?"
                       "((?P<protocol_init>\d*?)|(?P<xhr_path>\w*?))/?"
                       "(?P<jsonp_index>\d*?)" % (resource,
-                                                 extraRE,
-                                                 protoRE),
+                                                 extra_re,
+                                                 proto_re),
                       cls)
 
-def get_router(handler, resource, extraRE=None, extraSep=None):
+def get_router(handler, resource, extra_re=None, extra_sep=None):
     """Create new router class with desired properties.
 
     Use this function to create new socket.io server. For example:
@@ -115,5 +115,5 @@ def get_router(handler, resource, extraRE=None, extraSep=None):
        application = tornado.web.Application([PongRouter.route()])
     """
     router = type('SocketRouter', (SocketRouterBase,), {})
-    router._initialize(handler, resource, extraRE, extraSep)
+    router.initialize(handler, resource, extra_re, extra_sep)
     return router

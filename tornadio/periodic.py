@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+    tornadio.flashserver
+    ~~~~~~~~~~~~~~~~~~~~
+
+    This module implements customized PeriodicCallback from tornado with
+    support of the sliding window.
+
+    :copyright: (c) 2011 by the Serge S. Koval, see AUTHORS for more details.
+    :license: Apache, see LICENSE for more details.
+"""
 import time, logging
 
 from tornado.ioloop import IOLoop

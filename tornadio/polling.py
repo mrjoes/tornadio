@@ -9,10 +9,9 @@
     :license: Apache, see LICENSE for more details.
 """
 import time
-import logging
 try:
     import simplejson as json
-except:
+except ImportError:
     import json
 
 from tornado import ioloop
@@ -76,16 +75,16 @@ class TornadioPollingHandlerBase(RequestHandler):
     @asynchronous
     def get(self, *args, **kwargs):
         """Default GET handler."""
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @asynchronous
     def post(self, *args, **kwargs):
         """Default POST handler."""
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def data_available(self, data_available):
         """Called by the session when some data is available"""
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @asynchronous
     def options(self, *args, **kwargs):
@@ -111,6 +110,7 @@ class TornadioPollingHandlerBase(RequestHandler):
             return True
 
     def verify_origin(self):
+        """Verify if request can be served"""
         # TODO: Verify origin
         return True
 
@@ -128,20 +128,25 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
     2. When new data is available on server-side, it will be sent through the
     open GET connection or cached otherwise.
     """
+    def __init__(self, handler, session_id):
+        self._timeout = None
+
+        super(TornadioXHRPollingSocketHandler, self).__init__(handler,
+                                                              session_id)
 
     @asynchronous
     def get(self, *args, **kwargs):
         if not self.session.set_handler(self):
-            # Avoid double connections
+            # Check to avoid double connections
             # TODO: Error logging
             raise HTTPError(401, 'Forbidden')
 
         # TODO: Configurable timeout
-        # TODO: Do not setup timeout if there was something in the output queue
-        self._timeout = self.io_loop.add_timeout(time.time() + 20,
-                                                 self._polling_timeout)
-
-        self.session.flush()
+        if not self.session.send_queue:
+            self._timeout = self.io_loop.add_timeout(time.time() + 20,
+                                                     self._polling_timeout)
+        else:
+            self.session.flush()
 
     def _polling_timeout(self):
         if self.session:
@@ -170,7 +175,7 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         self._detach()
 
     # TODO: Async
-    def data_available(self, worker):
+    def data_available(self):
         # Encode message
         message = self.session.dump_messages()
 
@@ -197,7 +202,8 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
             # TODO: Error logging
             raise HTTPError(401, 'Forbidden')
 
-        self.set_header('Content-Type', 'multipart/x-mixed-replace;boundary="socketio"')
+        self.set_header('Content-Type',
+                        'multipart/x-mixed-replace;boundary="socketio"')
         self.set_header('Connection', 'keep-alive')
         self.write('--socketio\n')
 
@@ -227,7 +233,7 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
         self.session.remove_handler(self)
 
     # TODO: Async
-    def data_available(self, worker):
+    def data_available(self):
         # Encode message
         message = self.session.dump_messages()
 
@@ -284,7 +290,7 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
         self.session.remove_handler(self)
 
     # TODO: Async
-    def data_available(self, worker):
+    def data_available(self):
         # Encode message
         message = self.session.dump_messages()
 
@@ -298,6 +304,11 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
 class TornadioJSONPSocketHandler(TornadioXHRPollingSocketHandler):
     """JSONP protocol implementation.
     """
+    def __init__(self, handler, session_id):
+        self._index = None
+
+        super(TornadioJSONPSocketHandler, self).__init__(handler, session_id)
+
     @asynchronous
     def get(self, *args, **kwargs):
         self._index = kwargs.get('jsonp_index', None)
@@ -309,7 +320,7 @@ class TornadioJSONPSocketHandler(TornadioXHRPollingSocketHandler):
         super(TornadioJSONPSocketHandler, self).post(*args, **kwargs)
 
     # TODO: Async
-    def data_available(self, worker):
+    def data_available(self):
         message = 'io.JSONP[%s]._(%s);' % (
             self._index,
             json.dumps(self.session.dump_messages())

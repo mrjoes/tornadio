@@ -115,7 +115,7 @@ class PollingSession(session.Session):
         # If we have running GET request - notify protocol implementation
         # that we have some data available
         if self.handler is not None:
-            self.handler.data_available(self)
+            self.handler.data_available()
 
     def close(self):
         """Forcibly close connection and notify connection object about that.
