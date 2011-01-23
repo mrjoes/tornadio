@@ -17,7 +17,8 @@ PROTOCOLS = {
     'flashsocket': persistent.TornadioFlashSocketHandler,
     'xhr-polling': polling.TornadioXHRPollingSocketHandler,
     'xhr-multipart': polling.TornadioXHRMultipartSocketHandler,
-    'htmlfile': polling.TornadioXHRHtmlFileSocketHandler,
+    'htmlfile': polling.TornadioHtmlFileSocketHandler,
+    'jsonp-polling': polling.TornadioJSONPSocketHandler,
     }
 
 class SocketRouterBase(RequestHandler):
@@ -36,12 +37,12 @@ class SocketRouterBase(RequestHandler):
             proto_init = kwargs['protocol_init']
             session_id = kwargs['session_id']
 
-            print 'Incoming session %s(%s) Session ID: %s Extra: %s' % (
+            logging.debug('Incoming session %s(%s) Session ID: %s Extra: %s' % (
                 proto_name,
                 proto_init,
                 session_id,
                 extra
-                )
+                ))
 
             protocol = PROTOCOLS.get(proto_name, None)
 

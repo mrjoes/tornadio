@@ -5,7 +5,7 @@
   <script src="http://cdn.socket.io/stable/socket.io.js"></script>
   <script>
   jQuery(function() {
-    var s = new io.Socket("localhost", {port: 8001, transports:['xhr-polling']});
+    var s = new io.Socket("localhost", {port: 8001, transports:['jsonp-polling']});
     s.connect();
 
     function getPrintableDate(date) {

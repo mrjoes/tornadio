@@ -87,7 +87,6 @@ class TornadioPollingHandlerBase(RequestHandler):
     @asynchronous
     def options(self, *args, **kwargs):
         """XHR cross-domain OPTIONS handler"""
-        logging.debug('OPTIONS')
         self.preflight()
         self.finish()
 
@@ -152,7 +151,6 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         data = self.get_argument('data')
 
         if not self.preflight():
-            print 'Unauthorized'
             raise HTTPError(401, 'unauthorized')
 
         # TODO: async
@@ -166,7 +164,6 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         self.session = None
 
     def on_connection_close(self):
-        print 'Connection closed'
         self._detach()
 
     # TODO: Async
@@ -242,7 +239,7 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
         #if self.request.connection.stream.socket:
         #    self.session.reset_heartbeat()
 
-class TornadioXHRHtmlFileSocketHandler(TornadioPollingHandlerBase):
+class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
     """IE HtmlFile protocol implementation.
 
     Uses hidden frame to stream data from the server in one connection.
@@ -300,3 +297,32 @@ class TornadioXHRHtmlFileSocketHandler(TornadioPollingHandlerBase):
         # TODO: If we're still connected - reset heartbeat
         #if self.request.connection.stream.socket:
         #    self.session.reset_heartbeat()
+
+class TornadioJSONPSocketHandler(TornadioXHRPollingSocketHandler):
+    """JSONP protocol implementation.
+    """
+    @asynchronous
+    def get(self, *args, **kwargs):
+        self._index = kwargs.get('jsonp_index', None)
+        super(TornadioJSONPSocketHandler, self).get(*args, **kwargs)
+
+    @asynchronous
+    def post(self, *args, **kwargs):
+        self._index = kwargs.get('jsonp_index', None)
+        super(TornadioJSONPSocketHandler, self).post(*args, **kwargs)
+
+    # TODO: Async
+    def data_available(self, worker):
+        message = 'io.JSONP[%s]._(%s);' % (
+            self._index,
+            json.dumps(self.session.dump_messages())
+            )
+
+        self.preflight()
+        self.set_header("Content-Type", "text/javascript; charset=UTF-8")
+        self.set_header("Content-Length", len(message))
+        self.write(message)
+        self.finish()
+
+        # Detach connection
+        self._detach()
