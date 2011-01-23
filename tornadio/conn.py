@@ -100,7 +100,8 @@ class SocketConnection(object):
             self._heartbeat_timer = None
 
     def delay_heartbeat(self):
-        self._heartbeat_delay = self._heartbeat_timer.calculate_next_run()
+        if self._heartbeat_timer is not None:
+            self._heartbeat_delay = self._heartbeat_timer.calculate_next_run()
 
     def send_heartbeat(self):
         self._heartbeats += 1
