@@ -48,7 +48,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
         self.connection.stop_heartbeat()
 
     def send(self, message):
-        logging.debug('Send: %s', message)
+        logging.debug('Send: %s (%s)' % (message, self))
 
         self.async_callback(self.write_message)(proto.encode(message))
 
