@@ -2,6 +2,13 @@
 TornadIO
 ========
 
+TBD
+
+Contributors
+------------
+
+ - Serge. S. Koval serge@in-square.net
+
 Credits
 -------
 
