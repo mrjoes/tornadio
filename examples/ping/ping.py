@@ -14,13 +14,13 @@ class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
 
-class ChatConnection(tornadio.SocketConnection):
+class PingConnection(tornadio.SocketConnection):
     def on_message(self, message):
         message['server'] = str(datetime.now())
         self.send(message)
 
 #use the routes classmethod to build the correct resource
-PingRouter = tornadio.get_router(ChatConnection, "socket.io/*")
+PingRouter = tornadio.get_router(PingConnection, "socket.io/*")
 
 #configure the Tornado application
 application = tornado.web.Application(

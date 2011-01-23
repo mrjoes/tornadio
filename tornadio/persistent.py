@@ -31,21 +31,30 @@ class TornadioWebSocketHandler(WebSocketHandler):
 
         self.connection.reset_heartbeat()
 
+        # Fix me: websocket is dropping connection if we don't send first
+        # message which is session_id
+        self.send('no_session')
+
+        #self.connection.send_heartbeat()
+
     def on_message(self, message):
+        logging.debug('Message: %s' % message)
         self.connection.raw_message(message)
 
     def on_close(self):
+        logging.debug('Closed')
+
         self.connection.on_close()
         self.connection.is_closed = True
 
         self.connection.stop_heartbeat()
 
     def send(self, message):
+        logging.debug('Send: %s', message)
+
         self.async_callback(self.write_message)(proto.encode(message))
 
-        # TODO: If we're still connected - reset heartbeat
-        #if self.request.connection.stream.socket:
-        #    self.connection.reset_heartbeat()
+        self.connection.delay_heartbeat()
 
 def TornadioFlashSocketHandler(TornadioWebSocketHandler):
     def __init__(self, handler, session_id):

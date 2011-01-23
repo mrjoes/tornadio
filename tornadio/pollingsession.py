@@ -33,6 +33,7 @@ class PollingSession(session.Session):
 
         self.reset_heartbeat = self.connection.reset_heartbeat
         self.stop_heartbeat = self.connection.stop_heartbeat
+        self.delay_heartbeat = self.connection.delay_heartbeat
 
         # Send session_id
         self.send(session_id)

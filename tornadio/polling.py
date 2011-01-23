@@ -235,9 +235,7 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
         self.write('--socketio\n')
         self.flush()
 
-        # TODO: If we're still connected - reset heartbeat
-        #if self.request.connection.stream.socket:
-        #    self.session.reset_heartbeat()
+        self.session.delay_heartbeat()
 
 class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
     """IE HtmlFile protocol implementation.
@@ -294,9 +292,7 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
             )
         self.flush()
 
-        # TODO: If we're still connected - reset heartbeat
-        #if self.request.connection.stream.socket:
-        #    self.session.reset_heartbeat()
+        self.session.delay_heartbeat()
 
 class TornadioJSONPSocketHandler(TornadioXHRPollingSocketHandler):
     """JSONP protocol implementation.

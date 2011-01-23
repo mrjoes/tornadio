@@ -8,6 +8,8 @@
     :copyright: (c) 2011 by the Serge S. Koval, see AUTHORS for more details.
     :license: Apache, see LICENSE for more details.
 """
+import logging
+
 from tornado.web import RequestHandler, HTTPError
 
 from tornadio import persistent, polling

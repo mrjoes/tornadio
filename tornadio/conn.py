@@ -8,9 +8,9 @@
     :copyright: (c) 2011 by the Serge S. Koval, see AUTHORS for more details.
     :license: Apache, see LICENSE for more details.
 """
-from tornado import ioloop
+import logging, time
 
-from tornadio import proto
+from tornadio import proto, periodic
 
 class SocketConnection(object):
     """This class represents basic connection class that you will derive
@@ -45,6 +45,7 @@ class SocketConnection(object):
         # Initialize heartbeats
         self._heartbeat_timer = None
         self._heartbeats = 0
+        self._heartbeat_delay = None
 
         # Connection is not closed right after creation
         self.is_closed = False
@@ -81,14 +82,15 @@ class SocketConnection(object):
                 self.on_message(m[1])
             elif m[0] == proto.HEARTBEAT:
                 # TODO: Verify
-                print 'Incoming Heartbeat'
+                logging.debug('Incoming Heartbeat')
 
     # Heartbeat management
     def reset_heartbeat(self):
         """Reset (stop/start) heartbeat timeout"""
         self.stop_heartbeat()
 
-        self._heartbeat_timer = ioloop.PeriodicCallback(self._heartbeat, 12000)
+        # TODO: Configurable heartbeats
+        self._heartbeat_timer = periodic.Callback(self._heartbeat, 15000)
         self._heartbeat_timer.start()
 
     def stop_heartbeat(self):
@@ -97,6 +99,19 @@ class SocketConnection(object):
             self._heartbeat_timer.stop()
             self._heartbeat_timer = None
 
-    def _heartbeat(self):
+    def delay_heartbeat(self):
+        self._heartbeat_delay = self._heartbeat_timer.calculate_next_run()
+
+    def send_heartbeat(self):
         self._heartbeats += 1
         self.send('~h~%d' % self._heartbeats)
+
+    def _heartbeat(self):
+        if (self._heartbeat_delay is not None
+            and time.time() < self._heartbeat_delay):
+            delay = self._heartbeat_delay
+            self._heartbeat_delay = None
+            return delay
+
+        logging.debug('Heartbeat...')
+        self.send_heartbeat()

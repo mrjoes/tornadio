@@ -87,8 +87,6 @@ class SessionContainer(object):
             # Top most item is not expired yet
             top = self._queue[0]
 
-            print top
-
             # Early exit if item was not promoted and its expiration time
             # is greater than now.
             if top.promoted is None and top.expiry_date > current_time:
