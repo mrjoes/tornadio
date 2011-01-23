@@ -34,7 +34,8 @@ def encode(message):
         if message is not None:
             encoded += encode('~j~' + json.dumps(message, use_decimal=True))
     else:
-        encoded += "%s%d%s%s" % (FRAME, len(message), FRAME, message)
+        msg = message.encode('utf-8')
+        encoded += "%s%d%s%s" % (FRAME, len(msg), FRAME, msg)
 
     return encoded
 

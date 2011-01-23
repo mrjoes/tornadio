@@ -27,14 +27,15 @@
                      'Recv:   ' + getPrintableDate(now) + '<br/>' +
                      'Server: ' + getPrintableDate(server) + '<br/>' +
                      'Delta:  ' + (now.getTime() - ping.getTime()).toString() + '<br/>' +
-                     'SrDelta:' + (server.getTime() - ping.getTime()).toString()
+                     'SrDelta:' + (server.getTime() - ping.getTime()).toString() + '<br/>' +
+                     'Message:' + data.text
        );
 
       //sendPing();
     });
 
     function sendPing() {
-      var msg = { ping: getPrintableDate(new Date()) };
+      var msg = { ping: getPrintableDate(new Date()), text: $('#test').val() };
       s.send(msg);
       return false;
     }
@@ -45,6 +46,7 @@
 </head>
 <body>
   <a href="#">Start ping</a>
+  <input id="test"/>
   <div id="res" />
 </body>
 </html>
