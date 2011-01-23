@@ -7,7 +7,7 @@ TBD
 Contributors
 ------------
 
- - Serge. S. Koval serge@in-square.net
+ - `Serge. S. Koval <https://github.com/MrJoes/>`_
 
 Credits
 -------
