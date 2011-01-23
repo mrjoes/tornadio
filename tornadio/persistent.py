@@ -54,7 +54,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
 
         self.connection.delay_heartbeat()
 
-def TornadioFlashSocketHandler(TornadioWebSocketHandler):
+class TornadioFlashSocketHandler(TornadioWebSocketHandler):
     def __init__(self, handler, session_id):
         logging.debug('Initializing FlashSocket handler...')
 
