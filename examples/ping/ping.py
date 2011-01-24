@@ -25,13 +25,9 @@ PingRouter = tornadio.get_router(PingConnection)
 #configure the Tornado application
 application = tornado.web.Application(
     [(r"/", IndexHandler), PingRouter.route()],
-    enabled_protocols = ['websocket',
-                         'flashsocket',
-                         'xhr-multipart',
-                         'xhr-polling'],
+    socket_io_port = 8001,
     flash_policy_port = 843,
-    flash_policy_file = op.join(ROOT, 'flashpolicy.xml'),
-    socket_io_port = 8001
+    flash_policy_file = op.join(ROOT, 'flashpolicy.xml')
 )
 
 if __name__ == "__main__":

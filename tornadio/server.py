@@ -23,11 +23,9 @@ class SocketServer(HTTPServer):
     in contrast to the Tornado default behavior.
     If FlashSocket is enabled, starts up the policy server also."""
 
-    def __init__(self, application, no_keep_alive=False, io_loop=None,
-                 xheaders=False, ssl_options=None, socket_io_port=8888,
-                 flash_policy_port=843, flash_policy_file='flashpolicy.xml',
-                 enabled_protocols=['websocket', 'flashsocket', 'xhr-multipart',
-                                    'xhr-polling', 'jsonp-polling', 'htmlfile']
+    def __init__(self, application,
+                 no_keep_alive=False, io_loop=None,
+                 xheaders=False, ssl_options=None
                  ):
         """Initializes the server with the given request callback.
 
@@ -36,19 +34,11 @@ class SocketServer(HTTPServer):
         constructor. Each pre-forked child process will create its own
         IOLoop instance after the forking process.
         """
-        sett = application.settings
+        settings = application.settings
 
-        logging.debug('Starting up SocketIOServer with settings: %s' % sett)
-
-        enabled_protocols = sett.get('enabled_protocols', ['websocket',
-                                                           'flashsocket',
-                                                           'xhr-multipart',
-                                                           'xhr-polling',
-                                                           'jsonp-polling',
-                                                           'htmlfile'])
-        flash_policy_file = sett.get('flash_policy_file', 'flashpolicy.xml')
-        flash_policy_port = sett.get('flash_policy_port', 843)
-        socket_io_port = sett.get('socket_io_port', 8888)
+        flash_policy_file = settings.get('flash_policy_file', None)
+        flash_policy_port = settings.get('flash_policy_port', None)
+        socket_io_port = settings.get('socket_io_port', 8001)
 
         HTTPServer.__init__(self,
                             application,
@@ -57,17 +47,18 @@ class SocketServer(HTTPServer):
                             xheaders,
                             ssl_options)
 
-        logging.info('Starting up TornadIO Server on Port \'%s\'' %
+        logging.info('Starting up tornadio server on port \'%s\'' %
                      socket_io_port)
 
         self.listen(socket_io_port)
 
-        if 'flashsocket' in enabled_protocols:
-            logging.info('Flash Sockets enabled, starting Flash Policy Server '
-                         'on Port \'%s\'' % flash_policy_port)
-            flash_policy = FlashPolicyServer(port = flash_policy_port,
-                                             policy_file = flash_policy_file)
+        if flash_policy_file is not None and flash_policy_port is not None:
+            logging.info('Starting Flash Policy Server'
+                         ' on Port \'%s\'' % flash_policy_port)
+
+            flash_policy = FlashPolicyServer(port=flash_policy_port,
+                                             policy_file=flash_policy_file)
 
         io_loop = io_loop or ioloop.IOLoop.instance()
-        logging.info("Entering IOLoop...")
+        logging.info('Entering IOLoop...')
         io_loop.start()

@@ -32,7 +32,11 @@ DEFAULT_SETTINGS = {
     # Heartbeat time in seconds. Do not change this value unless
     # you absolutely sure that new value will work.
     'heartbeat_interval': 12,
+    # Enabled protocols
+    'enabled_protocols': ['websocket', 'flashsocket', 'xhr-multipart',
+                          'xhr-polling', 'jsonp-polling', 'htmlfile'],
     }
+
 
 class SocketRouterBase(RequestHandler):
     """Main request handler.
@@ -44,6 +48,7 @@ class SocketRouterBase(RequestHandler):
     _route = None
     _sessions = None
     _sessions_cleanup = None
+    settings = None
 
     def _execute(self, transforms, *args, **kwargs):
         try:
@@ -59,6 +64,10 @@ class SocketRouterBase(RequestHandler):
                 extra
                 ))
 
+            # If protocol is disabled, raise HTTPError
+            if proto_name not in self.settings['enabled_protocols']:
+                raise HTTPError(403, 'Forbidden')
+
             protocol = PROTOCOLS.get(proto_name, None)
 
             # TODO: Enabled transports configuration
@@ -70,7 +79,7 @@ class SocketRouterBase(RequestHandler):
                                 proto_name)
         except ValueError:
             # TODO: Debugging
-            raise HTTPError(400)
+            raise HTTPError(403, 'Forbidden')
 
     @property
     def connection(self):
