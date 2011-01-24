@@ -10,9 +10,10 @@
 """
 import logging
 
+from tornado import ioloop
 from tornado.web import RequestHandler, HTTPError
 
-from tornadio import persistent, polling
+from tornadio import persistent, polling, session
 
 PROTOCOLS = {
     'websocket': persistent.TornadioWebSocketHandler,
@@ -31,6 +32,8 @@ class SocketRouterBase(RequestHandler):
     """
     _connection = None
     _route = None
+    _sessions = None
+    _session_cleanup = None
 
     def _execute(self, transforms, *args, **kwargs):
         try:
@@ -64,19 +67,33 @@ class SocketRouterBase(RequestHandler):
         """Return associated connection class."""
         return self._connection
 
+    @property
+    def sessions(self):
+        return self._sessions
+
     @classmethod
     def route(cls):
         """Returns prepared Tornado routes"""
         return cls._route
 
     @classmethod
-    def initialize(cls, connection, resource, extra_re=None, extra_sep=None):
+    def tornadio_initialize(cls, connection, resource,
+                            extra_re=None, extra_sep=None):
         """Initialize class with the connection and resource.
 
         Does all behind the scenes work to setup routes, etc. Partially
         copied from SocketTornad.IO implementation.
         """
+        # Associate connection object
         cls._connection = connection
+
+        # Initialize sessions
+        cls._sessions = session.SessionContainer()
+
+        # TODO: Add support for configurable ioloop instance?
+        # TODO: Add support for configurable session cleanup timeouts
+        cls._session_cleanup = ioloop.PeriodicCallback(cls._sessions.expire,
+                                                       15000).start()
 
         # Copied from SocketTornad.IO with minor formatting
         if extra_re:
@@ -115,5 +132,5 @@ def get_router(handler, resource, extra_re=None, extra_sep=None):
        application = tornado.web.Application([PongRouter.route()])
     """
     router = type('SocketRouter', (SocketRouterBase,), {})
-    router.initialize(handler, resource, extra_re, extra_sep)
+    router.tornadio_initialize(handler, resource, extra_re, extra_sep)
     return router

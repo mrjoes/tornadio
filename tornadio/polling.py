@@ -17,7 +17,7 @@ except ImportError:
 from tornado import ioloop
 from tornado.web import RequestHandler, HTTPError, asynchronous
 
-from tornadio import session, pollingsession
+from tornadio import pollingsession
 
 class TornadioPollingHandlerBase(RequestHandler):
     """All polling transport implementations derive from this class.
@@ -34,11 +34,6 @@ class TornadioPollingHandlerBase(RequestHandler):
     6. If there were no GET requests for more than 15 seconds (default), virtual
     connection will be closed - session entry will expire
     """
-    _sessions = session.SessionContainer()
-
-    # TODO: Configurable callback timeout
-    _session_cleanup = ioloop.PeriodicCallback(_sessions.expire, 15000).start()
-
     io_loop = ioloop.IOLoop.instance()
 
     def __init__(self, handler, session_id):
@@ -51,9 +46,13 @@ class TornadioPollingHandlerBase(RequestHandler):
         # Decide what to do with the session - either create new or
         # get one from the cache.
         if not session_id:
-            self.session = self._create_session(handler.connection)
+            # TODO: Configurable expiry
+            self.session = handler.sessions.create_session(
+                pollingsession.Pollingsession,
+                expiry=15,
+                connection=handler.connection)
         else:
-            self.session = self._get_session(session_id)
+            self.session = handler.sessions.get(session_id)
 
             if self.session is None or self.session.is_closed:
                 # TODO: Send back disconnect message?
@@ -61,16 +60,6 @@ class TornadioPollingHandlerBase(RequestHandler):
 
         super(TornadioPollingHandlerBase, self).__init__(handler.application,
                                                          handler.request)
-
-    @classmethod
-    def _create_session(cls, connection):
-        return cls._sessions.create(pollingsession.PollingSession,
-                                    expiry=15,
-                                    connection=connection)
-
-    @classmethod
-    def _get_session(cls, session_id):
-        return cls._sessions.get(session_id)
 
     @asynchronous
     def get(self, *args, **kwargs):
