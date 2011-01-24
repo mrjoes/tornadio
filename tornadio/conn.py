@@ -34,11 +34,13 @@ class SocketConnection(object):
             def on_close(self):
                 print 'Client disconnected'
     """
-    def __init__(self, protocol):
+    def __init__(self, protocol, heartbeat_interval):
         """Default constructor.
 
         `protocol`
             Transport protocol implementation object.
+        `heartbeat_interval`
+            Heartbeat interval for this connection, in seconds.
         """
         self._protocol = protocol
 
@@ -46,6 +48,7 @@ class SocketConnection(object):
         self._heartbeat_timer = None
         self._heartbeats = 0
         self._heartbeat_delay = None
+        self._heartbeat_interval = heartbeat_interval * 1000
 
         # Connection is not closed right after creation
         self.is_closed = False
@@ -85,12 +88,16 @@ class SocketConnection(object):
                 logging.debug('Incoming Heartbeat')
 
     # Heartbeat management
-    def reset_heartbeat(self):
+    def reset_heartbeat(self, interval=None):
         """Reset (stop/start) heartbeat timeout"""
         self.stop_heartbeat()
 
         # TODO: Configurable heartbeats
-        self._heartbeat_timer = periodic.Callback(self._heartbeat, 12000)
+        if interval is None:
+            interval = self._heartbeat_interval
+
+        self._heartbeat_timer = periodic.Callback(self._heartbeat,
+                                                  interval*1000)
         self._heartbeat_timer.start()
 
     def stop_heartbeat(self):
@@ -110,11 +117,11 @@ class SocketConnection(object):
         self.send('~h~%d' % self._heartbeats)
 
     def _heartbeat(self):
+        """Heartbeat callback. Sends heartbeat to the client."""
         if (self._heartbeat_delay is not None
             and time.time() < self._heartbeat_delay):
             delay = self._heartbeat_delay
             self._heartbeat_delay = None
             return delay
 
-        logging.debug('Heartbeat...')
         self.send_heartbeat()

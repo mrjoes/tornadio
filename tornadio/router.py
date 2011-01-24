@@ -24,6 +24,16 @@ PROTOCOLS = {
     'jsonp-polling': polling.TornadioJSONPSocketHandler,
     }
 
+DEFAULT_SETTINGS = {
+    # Sessions check interval in seconds
+    'session_check_interval': 15,
+    # Session expiration in seconds
+    'session_expiry': 30,
+    # Heartbeat time in seconds. Do not change this value unless
+    # you absolutely sure that new value will work.
+    'heartbeat_interval': 12,
+    }
+
 class SocketRouterBase(RequestHandler):
     """Main request handler.
 
@@ -33,7 +43,7 @@ class SocketRouterBase(RequestHandler):
     _connection = None
     _route = None
     _sessions = None
-    _session_cleanup = None
+    _sessions_cleanup = None
 
     def _execute(self, transforms, *args, **kwargs):
         try:
@@ -77,7 +87,7 @@ class SocketRouterBase(RequestHandler):
         return cls._route
 
     @classmethod
-    def tornadio_initialize(cls, connection, resource,
+    def tornadio_initialize(cls, connection, user_settings, resource,
                             extra_re=None, extra_sep=None):
         """Initialize class with the connection and resource.
 
@@ -87,13 +97,21 @@ class SocketRouterBase(RequestHandler):
         # Associate connection object
         cls._connection = connection
 
+        # Associate settings
+        settings = DEFAULT_SETTINGS.copy()
+
+        if user_settings is not None:
+            settings.update(user_settings)
+
+        cls.settings = settings
+
         # Initialize sessions
         cls._sessions = session.SessionContainer()
 
         # TODO: Add support for configurable ioloop instance?
-        # TODO: Add support for configurable session cleanup timeouts
-        cls._session_cleanup = ioloop.PeriodicCallback(cls._sessions.expire,
-                                                       15000).start()
+        check_interval = settings['session_check_interval'] * 1000
+        cls._sessions_cleanup = ioloop.PeriodicCallback(cls._sessions.expire,
+                                                        check_interval).start()
 
         # Copied from SocketTornad.IO with minor formatting
         if extra_re:
@@ -118,7 +136,8 @@ class SocketRouterBase(RequestHandler):
                                                  proto_re),
                       cls)
 
-def get_router(handler, resource, extra_re=None, extra_sep=None):
+def get_router(handler, settings=None, resource='socket.io/*',
+               extra_re=None, extra_sep=None):
     """Create new router class with desired properties.
 
     Use this function to create new socket.io server. For example:
@@ -127,10 +146,10 @@ def get_router(handler, resource, extra_re=None, extra_sep=None):
            def on_message(self, message):
                self.send(message)
 
-       PongRouter = get_router(PongConnection, 'socket.io/*')
+       PongRouter = get_router(PongConnection)
 
        application = tornado.web.Application([PongRouter.route()])
     """
     router = type('SocketRouter', (SocketRouterBase,), {})
-    router.tornadio_initialize(handler, resource, extra_re, extra_sep)
+    router.tornadio_initialize(handler, settings, resource, extra_re, extra_sep)
     return router

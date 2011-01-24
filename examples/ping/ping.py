@@ -20,7 +20,7 @@ class PingConnection(tornadio.SocketConnection):
         self.send(message)
 
 #use the routes classmethod to build the correct resource
-PingRouter = tornadio.get_router(PingConnection, "socket.io/*")
+PingRouter = tornadio.get_router(PingConnection)
 
 #configure the Tornado application
 application = tornado.web.Application(

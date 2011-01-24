@@ -46,11 +46,14 @@ class TornadioPollingHandlerBase(RequestHandler):
         # Decide what to do with the session - either create new or
         # get one from the cache.
         if not session_id:
-            # TODO: Configurable expiry
+            heartbeat_interval = handler.settings['heartbeat_interval']
+            session_expiry = handler.settings['session_expiry']
+
             self.session = handler.sessions.create_session(
                 pollingsession.Pollingsession,
-                expiry=15,
-                connection=handler.connection)
+                expiry=session_expiry,
+                connection=handler.connection,
+                heartbeat_interval=heartbeat_interval)
         else:
             self.session = handler.sessions.get(session_id)
 

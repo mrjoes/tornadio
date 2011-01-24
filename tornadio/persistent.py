@@ -21,7 +21,10 @@ class TornadioWebSocketHandler(WebSocketHandler):
         logging.debug('Initializing WebSocket handler...')
 
         self.handler = handler
-        self.connection = handler.connection(self)
+
+        # Create connection instance
+        heartbeat_interval = handler.settings['heartbeat_interval']
+        self.connection = handler.connection(self, heartbeat_interval)
 
         super(TornadioWebSocketHandler, self).__init__(handler.application,
                                                        handler.request)
