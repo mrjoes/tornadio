@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script src="http://cdn.socket.io/stable/socket.io.js"></script>
-<script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script src="http://cdn.socket.io/stable/socket.io.js"></script>
+  <script>WEB_SOCKET_SWF_LOCATION = 'http://cdn.socket.io/stable/WebSocketMain.swf';</script>
+  <script>
     window.onload = function() {
 
         var s = new io.Socket(window.location.hostname, {port: 8001, transports:['xhr-polling']});
@@ -29,7 +30,6 @@
 </head>
 <body>
 <h3>Chat!</h3>
-<p>(Only tested in Chrome)</p>
 <div id="chat" style="width: 60em; height: 20em; overflow:auto; border: 1px solid black">
 </div>
 <form id="chatform">

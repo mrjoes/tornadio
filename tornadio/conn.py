@@ -97,7 +97,7 @@ class SocketConnection(object):
             interval = self._heartbeat_interval
 
         self._heartbeat_timer = periodic.Callback(self._heartbeat,
-                                                  interval*1000)
+                                                  interval)
         self._heartbeat_timer.start()
 
     def stop_heartbeat(self):
@@ -123,5 +123,7 @@ class SocketConnection(object):
             delay = self._heartbeat_delay
             self._heartbeat_delay = None
             return delay
+
+        logging.debug('Sending heartbeat')
 
         self.send_heartbeat()

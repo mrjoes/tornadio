@@ -17,12 +17,13 @@ class PollingSession(session.Session):
     messages, if there is on going GET connection - will pass cached/current
     messages to the actual transport protocol implementation.
     """
-    def __init__(self, session_id, expiry, connection, *args, **kwargs):
+    def __init__(self, session_id, expiry, connection, heartbeat_interval,
+                 *args, **kwargs):
         # Initialize session
         super(PollingSession, self).__init__(session_id, expiry)
 
         # Set connection
-        self.connection = connection(self)
+        self.connection = connection(self, heartbeat_interval)
         self.handler = None
         self.send_queue = []
 
@@ -86,24 +87,16 @@ class PollingSession(session.Session):
         # after disconnection
         self.promote()
 
-    def dump_messages(self):
-        """Get list of the pending messages and clears queue
-        """
-        messages = proto.encode(self.send_queue)
-        self.send_queue = []
-        return messages
-
     def flush(self):
         """Send all pending messages to the associated request handler (if any)
         """
         if self.handler is None:
-            # TODO: Assert
             return
 
         if not self.send_queue:
             return
 
-        self.handler.data_available(self)
+        self.handler.data_available(proto.encode(self.send_queue))
         self.send_queue = []
 
     # TODO: Asynchronous
@@ -112,10 +105,8 @@ class PollingSession(session.Session):
         """
         self.send_queue.append(message)
 
-        # If we have running GET request - notify protocol implementation
-        # that we have some data available
-        if self.handler is not None:
-            self.handler.data_available()
+        # TODO: Async flush
+        self.flush()
 
     def close(self):
         """Forcibly close connection and notify connection object about that.

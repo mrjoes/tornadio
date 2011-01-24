@@ -49,8 +49,8 @@ class TornadioPollingHandlerBase(RequestHandler):
             heartbeat_interval = handler.settings['heartbeat_interval']
             session_expiry = handler.settings['session_expiry']
 
-            self.session = handler.sessions.create_session(
-                pollingsession.Pollingsession,
+            self.session = handler.sessions.create(
+                pollingsession.PollingSession,
                 expiry=session_expiry,
                 connection=handler.connection,
                 heartbeat_interval=heartbeat_interval)
@@ -74,7 +74,7 @@ class TornadioPollingHandlerBase(RequestHandler):
         """Default POST handler."""
         raise NotImplementedError()
 
-    def data_available(self, data_available):
+    def data_available(self, raw_data):
         """Called by the session when some data is available"""
         raise NotImplementedError()
 
@@ -141,8 +141,9 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
             self.session.flush()
 
     def _polling_timeout(self):
+        # TODO: Fix me
         if self.session:
-            self.session.send('')
+            self.data_available('')
 
     @asynchronous
     def post(self, *args, **kwargs):
@@ -167,14 +168,11 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         self._detach()
 
     # TODO: Async
-    def data_available(self):
-        # Encode message
-        message = self.session.dump_messages()
-
+    def data_available(self, raw_data):
         self.preflight()
         self.set_header("Content-Type", "text/plain; charset=UTF-8")
-        self.set_header("Content-Length", len(message))
-        self.write(message)
+        self.set_header("Content-Length", len(raw_data))
+        self.write(raw_data)
         self.finish()
 
         # Detach connection
@@ -225,13 +223,10 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
         self.session.remove_handler(self)
 
     # TODO: Async
-    def data_available(self):
-        # Encode message
-        message = self.session.dump_messages()
-
+    def data_available(self, raw_data):
         self.preflight()
         self.write("Content-Type: text/plain; charset=us-ascii\n\n")
-        self.write(message + '\n')
+        self.write(raw_data + '\n')
         self.write('--socketio\n')
         self.flush()
 
@@ -282,12 +277,9 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
         self.session.remove_handler(self)
 
     # TODO: Async
-    def data_available(self):
-        # Encode message
-        message = self.session.dump_messages()
-
+    def data_available(self, raw_data):
         self.write(
-            '<script>parent.s_(%s), document);</script>' % json.dumps(message)
+            '<script>parent.s_(%s),document);</script>' % json.dumps(raw_data)
             )
         self.flush()
 
@@ -312,10 +304,10 @@ class TornadioJSONPSocketHandler(TornadioXHRPollingSocketHandler):
         super(TornadioJSONPSocketHandler, self).post(*args, **kwargs)
 
     # TODO: Async
-    def data_available(self):
+    def data_available(self, raw_data):
         message = 'io.JSONP[%s]._(%s);' % (
             self._index,
-            json.dumps(self.session.dump_messages())
+            json.dumps(raw_data)
             )
 
         self.preflight()
