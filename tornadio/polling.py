@@ -123,6 +123,8 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
     def __init__(self, handler, session_id):
         self._timeout = None
 
+        self._timeout_interval = handler.settings['xhr_polling_timeout']
+
         super(TornadioXHRPollingSocketHandler, self).__init__(handler,
                                                               session_id)
 
@@ -135,8 +137,9 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
 
         # TODO: Configurable timeout
         if not self.session.send_queue:
-            self._timeout = self.io_loop.add_timeout(time.time() + 20,
-                                                     self._polling_timeout)
+            self._timeout = self.io_loop.add_timeout(
+                time.time() + self._timeout_interval,
+                self._polling_timeout)
         else:
             self.session.flush()
 

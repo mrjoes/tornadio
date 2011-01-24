@@ -27,8 +27,8 @@ def encode(message):
     """
     encoded = ''
     if isinstance(message, list):
-        for m in message:
-            encoded += encode(m)
+        for msg in message:
+            encoded += encode(msg)
     elif (not isinstance(message, (unicode, str))
           and isinstance(message, (object, dict))):
         if message is not None:

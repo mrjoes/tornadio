@@ -35,6 +35,8 @@ DEFAULT_SETTINGS = {
     # Enabled protocols
     'enabled_protocols': ['websocket', 'flashsocket', 'xhr-multipart',
                           'xhr-polling', 'jsonp-polling', 'htmlfile'],
+    # XHR-Polling request timeout, in seconds
+    'xhr_polling_timeout': 20,
     }
 
 
