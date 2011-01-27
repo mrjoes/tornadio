@@ -27,12 +27,12 @@ it was not finished, has several known bugs and not very well structured.
 
 TornadIO is different from SocketTornad.IO library in following aspects:
 
- - Simpler internal design, easier to maintain/extend
- - No external dependencies (except of the Tornado itself and simplejson on python < 2.6)
- - Properly handles on_open/on_close events for polling transports
- - Proper Socket.IO protocol parser
- - Proper unicode support
- - Actively maintained
+- Simpler internal design, easier to maintain/extend
+- No external dependencies (except of the Tornado itself and simplejson on python < 2.6)
+- Properly handles on_open/on_close events for polling transports
+- Proper Socket.IO protocol parser
+- Proper unicode support
+- Actively maintained
 
 Introduction
 ------------
