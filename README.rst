@@ -1,5 +1,5 @@
 ========
-TornadIO
+Tornadio
 ========
 
 Contributors
@@ -29,7 +29,7 @@ from scratch.
 
 TornadIO is different from SocketTornad.IO library in following aspects:
 
- - Simplier internal design, easier to maintain/extend
+ - Simpler internal design, easier to maintain/extend
  - No external dependencies (except of the Tornado itself and simplejson on python < 2.6)
  - Properly handles on_open/on_close events for polling transports
  - Proper Socket.IO protocol parser
@@ -41,7 +41,7 @@ Introduction
 
 In order to start working with the TornadIO library, you need to know some basic concepts
 on how Tornado works. If you don't, please read Tornado tutorial, which can be found
-`here <http://www.tornadoweb.org/documentation#tornado-walkthrough>`.
+`here <http://www.tornadoweb.org/documentation#tornado-walk-through>`.
 
 If you're familiar with Tornado, do following to add support for Socket.IO to your application:
 
@@ -58,7 +58,7 @@ If you're familiar with Tornado, do following to add support for Socket.IO to yo
 3. Add your handler routes to the Tornado application::
 
   application = tornado.web.Application(
-    [ChatRouter.route()],
+    [MyRouter.route()],
     socket_io_port = 8000)
 
 4. Start your application
@@ -116,7 +116,7 @@ Starting Up
 Best Way: SocketServer
 ^^^^^^^^^^^^^^^^^^^^^^
 
-We provide customized version (shamesly borrowed from the SocketTornad.IO library) of the HttpServer, which
+We provide customized version (shamelessly borrowed from the SocketTornad.IO library) of the HttpServer, which
 simplifies start of the your TornadIO server.
 
 To start it, do following (assuming you created application object before)::
