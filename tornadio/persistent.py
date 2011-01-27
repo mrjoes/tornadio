@@ -39,22 +39,16 @@ class TornadioWebSocketHandler(WebSocketHandler):
         self.connection.on_open(*args, **kwargs)
 
     def on_message(self, message):
-        logging.debug('Message: %s', message)
         self.async_callback(self.connection.raw_message)(message)
 
     def on_close(self):
-        logging.debug('Closed')
-
         self.connection.on_close()
         self.connection.is_closed = True
 
         self.connection.stop_heartbeat()
 
     def send(self, message):
-        logging.debug('Send: %s (%s)', message, self)
-
-        self.async_callback(self.write_message)(proto.encode(message))
-
+        self.write_message(proto.encode(message))
         self.connection.delay_heartbeat()
 
 class TornadioFlashSocketHandler(TornadioWebSocketHandler):

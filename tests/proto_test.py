@@ -34,7 +34,7 @@ def test_decode():
 
     # Test unicode decode
     eq_(proto.decode(proto.encode(u'\u0430\u0431\u0432')),
-        [('~m~', u'\u0430\u0431\u0432')])
+        [('~m~', u'\u0430\u0431\u0432'.encode('utf-8'))])
 
     # Test JSON decode
     eq_(proto.decode(proto.encode({'a':'b'})),
