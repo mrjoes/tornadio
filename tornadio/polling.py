@@ -84,7 +84,6 @@ class TornadioPollingHandlerBase(RequestHandler):
         self.preflight()
         self.finish()
 
-    @asynchronous
     def preflight(self):
         """Handles request authentication"""
         if self.request.headers.has_key('Origin'):
@@ -135,7 +134,6 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
             # TODO: Error logging
             raise HTTPError(401, 'Forbidden')
 
-        # TODO: Configurable timeout
         if not self.session.send_queue:
             self._timeout = self.io_loop.add_timeout(
                 time.time() + self._timeout_interval,
@@ -150,16 +148,13 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
 
     @asynchronous
     def post(self, *args, **kwargs):
-        self.set_header('Content-Type', 'text/plain')
-
-        data = self.get_argument('data')
-
         if not self.preflight():
             raise HTTPError(401, 'unauthorized')
 
-        # TODO: async
-        self.session.raw_message(data)
+        data = self.get_argument('data')
+        self.async_callback(self.session.raw_message)(data)
 
+        self.set_header('Content-Type', 'text/plain')
         self.write('ok')
         self.finish()
 
@@ -170,7 +165,6 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
     def on_connection_close(self):
         self._detach()
 
-    # TODO: Async
     def data_available(self, raw_data):
         self.preflight()
         self.set_header("Content-Type", "text/plain; charset=UTF-8")
@@ -208,16 +202,13 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
 
     @asynchronous
     def post(self, *args, **kwargs):
-        self.set_header('Content-Type', 'text/plain')
-
-        data = self.get_argument('data')
-
         if not self.preflight():
             raise HTTPError(401, 'unauthorized')
 
-        # TODO: async
-        self.session.raw_message(data)
+        data = self.get_argument('data')
+        self.async_callback(self.session.raw_message)(data)
 
+        self.set_header('Content-Type', 'text/plain')
         self.write('ok')
         self.finish()
 
@@ -225,7 +216,6 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
         self.session.stop_heartbeat()
         self.session.remove_handler(self)
 
-    # TODO: Async
     def data_available(self, raw_data):
         self.preflight()
         self.write("Content-Type: text/plain; charset=us-ascii\n\n")
@@ -262,16 +252,13 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
 
     @asynchronous
     def post(self, *args, **kwargs):
-        self.set_header('Content-Type', 'text/plain')
-
-        data = self.get_argument('data')
-
         if not self.preflight():
             raise HTTPError(401, 'unauthorized')
 
-        # TODO: async
-        self.session.raw_message(data)
+        data = self.get_argument('data')
+        self.async_callback(self.session.raw_message)(data)
 
+        self.set_header('Content-Type', 'text/plain')
         self.write('ok')
         self.finish()
 

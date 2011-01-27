@@ -34,7 +34,7 @@ class FlashPolicyServer(object):
         callback = functools.partial(self.connection_ready, sock)
         self.io_loop.add_handler(sock.fileno(), callback, self.io_loop.READ)
 
-    def connection_ready(self, sock, fd, events):
+    def connection_ready(self, sock, _fd, _events):
         """Connection ready callback"""
         while True:
             try:

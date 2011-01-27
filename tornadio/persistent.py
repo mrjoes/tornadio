@@ -40,7 +40,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
 
     def on_message(self, message):
         logging.debug('Message: %s', message)
-        self.connection.raw_message(message)
+        self.async_callback(self.connection.raw_message)(message)
 
     def on_close(self):
         logging.debug('Closed')
