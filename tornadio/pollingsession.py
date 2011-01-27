@@ -99,13 +99,12 @@ class PollingSession(session.Session):
         self.handler.data_available(proto.encode(self.send_queue))
         self.send_queue = []
 
-    # TODO: Asynchronous
     def send(self, message):
-        """Append message to the queue
+        """Append message to the queue and send it right away, if there's
+        connection available.
         """
         self.send_queue.append(message)
 
-        # TODO: Async flush
         self.flush()
 
     def close(self):

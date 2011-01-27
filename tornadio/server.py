@@ -47,14 +47,14 @@ class SocketServer(HTTPServer):
                             xheaders,
                             ssl_options)
 
-        logging.info('Starting up tornadio server on port \'%s\'' %
+        logging.info('Starting up tornadio server on port \'%s\'',
                      socket_io_port)
 
         self.listen(socket_io_port)
 
         if flash_policy_file is not None and flash_policy_port is not None:
-            logging.info('Starting Flash Policy Server'
-                         ' on Port \'%s\'' % flash_policy_port)
+            logging.info('Starting Flash Policy Server on Port \'%s\'',
+                         flash_policy_port)
 
             flash_policy = FlashPolicyServer(port=flash_policy_port,
                                              policy_file=flash_policy_file)

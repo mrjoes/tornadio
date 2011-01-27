@@ -10,12 +10,16 @@
     :license: Apache, see LICENSE for more details.
 """
 
-from heapq import heappush, heappop, heapify
-from time import time, sleep, clock
+from heapq import heappush, heappop
+from time import time
 from hashlib import md5
-from random import random, randint
+from random import random
 
 class Session(object):
+    """Represents one session object stored in the session container.
+    Derive from this object to store additional data.
+    """
+
     def __init__(self, session_id, expiry=None):
         self.session_id = session_id
         self.promoted = None
@@ -25,10 +29,14 @@ class Session(object):
             self.expiry_date = time() + self.expiry
 
     def promote(self):
+        """Mark object is living, so it won't be collected during next
+        run of the session garbage collector.
+        """
         if self.expiry is not None:
             self.promoted = time() + self.expiry
 
     def on_delete(self, forced):
+        """Triggered when object was expired or deleted."""
         pass
 
     def __cmp__(self, other):
@@ -39,18 +47,20 @@ class Session(object):
                              self.session_id,
                              self.promoted or 0)
 
+def _random_key():
+    """Return random session key"""
+    i = md5()
+    i.update('%s%s' % (random(), time()))
+    return i.hexdigest()
+
 class SessionContainer(object):
     def __init__(self):
         self._items = dict()
         self._queue = []
 
-    def _random_key(self):
-        m = md5()
-        m.update('%s%s' % (random(), time()))
-        return m.hexdigest()
-
     def create(self, session, expiry=None, **kwargs):
-        kwargs['session_id'] = self._random_key()
+        """Create new session object."""
+        kwargs['session_id'] = _random_key()
         kwargs['expiry'] = expiry
 
         session = session(**kwargs)
@@ -63,9 +73,11 @@ class SessionContainer(object):
         return session
 
     def get(self, session_id):
+        """Return session object or None if it is not available"""
         return self._items.get(session_id, None)
 
     def remove(self, session_id):
+        """Remove session object from the container"""
         session = self._items.get(session_id, None)
 
         if session is not None:
@@ -77,6 +89,7 @@ class SessionContainer(object):
         return False
 
     def expire(self, current_time=None):
+        """Expire any old entries"""
         if not self._queue:
             return
 
