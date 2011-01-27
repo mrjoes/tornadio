@@ -21,7 +21,7 @@ transport library on top of the `Tornado <http://www.tornadoweb.org>`_ framework
 Short Background
 ----------------
 
-There's already library which already implements Socket.IO integration using Tornado
+There's a library which already implements Socket.IO integration using Tornado
 framework - `SocketTornad.IO <http://github.com/SocketTornad.IO/>`_, but
 it was not finished, has several known bugs and not very well structured.
 
