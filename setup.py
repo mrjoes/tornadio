@@ -21,7 +21,7 @@ setup(
     name='TornadIO',
     version='0.0.1',
     author='Serge S. Koval',
-    author_email='serge@in-square.net',
+    author_email='serge.koval@gmail.com',
     packages=['tornadio'],
     scripts=[],
     url='http://github.com/MrJoes/tornadio/',

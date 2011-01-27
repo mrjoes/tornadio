@@ -5,15 +5,15 @@ Tornadio
 Contributors
 ------------
 
- - `Serge S. Koval <https://github.com/MrJoes/>`_
+-  `Serge S. Koval <https://github.com/MrJoes/>`_
 
 Credits
 -------
 
 Authors of SocketTornad.IO project:
 
- - Brendan W. McAdams bwmcadams@evilmonkeylabs.com
- - `Matt Swanson <http://github.com/swanson>`_
+-  Brendan W. McAdams bwmcadams@evilmonkeylabs.com
+-  `Matt Swanson <http://github.com/swanson>`_
 
 This is implementation of the `Socket.IO <http://socket.io>`_ realtime
 transport library on top of the `Tornado <http://www.tornadoweb.org>`_ framework.
@@ -21,11 +21,9 @@ transport library on top of the `Tornado <http://www.tornadoweb.org>`_ framework
 Short Background
 ----------------
 
-There's already library that implements Socket.IO integration with Tornado
+There's already library which already implements Socket.IO integration using Tornado
 framework - `SocketTornad.IO <http://github.com/SocketTornad.IO/>`_, but
-it was not finished. Also, I did not like how it is designed, so instead
-of writing patches for the original library, decided to implement one
-from scratch.
+it was not finished, has several known bugs and not very well structured.
 
 TornadIO is different from SocketTornad.IO library in following aspects:
 
@@ -45,17 +43,20 @@ on how Tornado works. If you don't, please read Tornado tutorial, which can be f
 
 If you're familiar with Tornado, do following to add support for Socket.IO to your application:
 
-1. Derive from tornadio.SocketConnection class and override on_message method (on_open/on_close are optional)::
+1. Derive from tornadio.SocketConnection class and override on_message method (on_open/on_close are optional):
+::
 
   class MyConnection(tornadio.SocketConnection):
     def on_message(self, message):
       pass
 
-2. Create handler object that will handle all `socket.io` transport related functionality::
+2. Create handler object that will handle all `socket.io` transport related functionality:
+::
 
   MyRouter = tornadio.get_router(MyConnection)
 
-3. Add your handler routes to the Tornado application::
+3. Add your handler routes to the Tornado application:
+::
 
   application = tornado.web.Application(
     [MyRouter.route()],
