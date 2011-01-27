@@ -65,7 +65,7 @@ def decode(data):
         # Skip message type
         idx += 3
 
-        msg_data = data[idx:idx + msg_len]
+        msg_data = data[idx:idx + msg_len].decode('utf-8')
 
         if msg_data.startswith(JSON):
             msg_data = json.loads(msg_data[3:])
