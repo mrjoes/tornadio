@@ -15,14 +15,14 @@ Authors of SocketTornad.IO project:
  - Brendan W. McAdams bwmcadams@evilmonkeylabs.com
  - `Matt Swanson <http://github.com/swanson>`_
 
-This is implementation of the `Socket.IO <http://socket.io>` realtime
-transport library on top of the `Tornado <http://www.tornadoweb.org>` framework.
+This is implementation of the `Socket.IO <http://socket.io>`_ realtime
+transport library on top of the `Tornado <http://www.tornadoweb.org>`_ framework.
 
 Short Background
 ----------------
 
 There's already library that implements Socket.IO integration with Tornado
-framework - `SocketTornad.IO <http://github.com/SocketTornad.IO/>`, but
+framework - `SocketTornad.IO <http://github.com/SocketTornad.IO/>`_, but
 it was not finished. Also, I did not like how it is designed, so instead
 of writing patches for the original library, decided to implement one
 from scratch.
@@ -41,7 +41,7 @@ Introduction
 
 In order to start working with the TornadIO library, you need to know some basic concepts
 on how Tornado works. If you don't, please read Tornado tutorial, which can be found
-`here <http://www.tornadoweb.org/documentation#tornado-walk-through>`.
+`here <http://www.tornadoweb.org/documentation#tornado-walk-through>`_.
 
 If you're familiar with Tornado, do following to add support for Socket.IO to your application:
 
