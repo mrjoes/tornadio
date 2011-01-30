@@ -126,10 +126,7 @@ class SocketRouterBase(RequestHandler):
         # Copied from SocketTornad.IO with minor formatting
         if extra_re:
             if extra_re[0] != '(?P<extra>':
-                if extra_re[0] == '(':
-                    extra_re = r'(?P<extra>%s)' % extra_re
-                else:
-                    extra_re = r"(?P<extra>%s)" % extra_re
+                extra_re = r'(?P<extra>%s)' % extra_re
             if extra_sep:
                 extra_re = extra_sep + extra_re
         else:
