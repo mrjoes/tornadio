@@ -98,14 +98,19 @@ class SocketRouterBase(RequestHandler):
 
     @classmethod
     def tornadio_initialize(cls, connection, user_settings, resource,
-                            extra_re=None, extra_sep=None):
+                            io_loop=None, extra_re=None, extra_sep=None):
         """Initialize class with the connection and resource.
 
         Does all behind the scenes work to setup routes, etc. Partially
         copied from SocketTornad.IO implementation.
         """
+
+
         # Associate connection object
         cls._connection = connection
+
+        # Initialize io_loop
+        cls.io_loop = io_loop or ioloop.IOLoop.instance()
 
         # Associate settings
         settings = DEFAULT_SETTINGS.copy()
@@ -121,7 +126,8 @@ class SocketRouterBase(RequestHandler):
         # TODO: Add support for configurable ioloop instance?
         check_interval = settings['session_check_interval'] * 1000
         cls._sessions_cleanup = ioloop.PeriodicCallback(cls._sessions.expire,
-                                                        check_interval).start()
+                                                        check_interval,
+                                                        cls.io_loop).start()
 
         # Copied from SocketTornad.IO with minor formatting
         if extra_re:

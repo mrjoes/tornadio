@@ -20,7 +20,7 @@ from tornado import ioloop, iostream
 class FlashPolicyServer(object):
     """Flash Policy server, listens on port 843 by default (useless otherwise)
     """
-    def __init__(self, port=843, policy_file='flashpolicy.xml'):
+    def __init__(self, io_loop, port=843, policy_file='flashpolicy.xml'):
         self.policy_file = policy_file
         self.port = port
 
@@ -30,7 +30,7 @@ class FlashPolicyServer(object):
         sock.bind(('', self.port))
         sock.listen(128)
 
-        self.io_loop = ioloop.IOLoop.instance()
+        self.io_loop = io_loop
         callback = functools.partial(self.connection_ready, sock)
         self.io_loop.add_handler(sock.fileno(), callback, self.io_loop.READ)
 

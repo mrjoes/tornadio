@@ -34,15 +34,19 @@ class SocketConnection(object):
             def on_close(self):
                 print 'Client disconnected'
     """
-    def __init__(self, protocol, heartbeat_interval):
+    def __init__(self, protocol, io_loop, heartbeat_interval):
         """Default constructor.
 
         `protocol`
             Transport protocol implementation object.
+        `io_loop`
+            Tornado IOLoop instance
         `heartbeat_interval`
             Heartbeat interval for this connection, in seconds.
         """
         self._protocol = protocol
+
+        self._io_loop = io_loop
 
         # Initialize heartbeats
         self._heartbeat_timer = None
@@ -97,7 +101,8 @@ class SocketConnection(object):
             interval = self._heartbeat_interval
 
         self._heartbeat_timer = periodic.Callback(self._heartbeat,
-                                                  interval)
+                                                  interval,
+                                                  self._io_loop)
         self._heartbeat_timer.start()
 
     def stop_heartbeat(self):

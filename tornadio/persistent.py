@@ -63,7 +63,9 @@ class TornadioWebSocketHandler(WebSocketHandler):
     def open(self, *args, **kwargs):
         # Create connection instance
         heartbeat_interval = self.handler.settings['heartbeat_interval']
-        self.connection = self.handler.connection(self, heartbeat_interval)
+        self.connection = self.handler.connection(self,
+                                                  self.handler.io_loop,
+                                                  heartbeat_interval)
 
         # Initialize heartbeats
         self.connection.reset_heartbeat()

@@ -11,13 +11,11 @@
 """
 import time, logging
 
-from tornado.ioloop import IOLoop
-
 class Callback(object):
-    def __init__(self, callback, callback_time, io_loop=None):
+    def __init__(self, callback, callback_time, io_loop):
         self.callback = callback
         self.callback_time = callback_time
-        self.io_loop = io_loop or IOLoop.instance()
+        self.io_loop = io_loop
         self._running = False
 
     def calculate_next_run(self):

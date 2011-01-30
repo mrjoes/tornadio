@@ -14,7 +14,6 @@ try:
 except ImportError:
     import json
 
-from tornado import ioloop
 from tornado.web import RequestHandler, HTTPError, asynchronous
 
 from tornadio import pollingsession
@@ -34,8 +33,6 @@ class TornadioPollingHandlerBase(RequestHandler):
     6. If there were no GET requests for more than 15 seconds (default), virtual
     connection will be closed - session entry will expire
     """
-    io_loop = ioloop.IOLoop.instance()
-
     def __init__(self, handler, session_id):
         """Default constructor.
 
@@ -52,16 +49,12 @@ class TornadioPollingHandlerBase(RequestHandler):
         # Initialize session either by creating new one or
         # getting it from container
         if not self.session_id:
-            handler = self.handler
+            session_expiry = self.handler.settings['session_expiry']
 
-            heartbeat_interval = handler.settings['heartbeat_interval']
-            session_expiry = handler.settings['session_expiry']
-
-            self.session = handler.sessions.create(
+            self.session = self.handler.sessions.create(
                 pollingsession.PollingSession,
-                expiry=session_expiry,
-                connection=handler.connection,
-                heartbeat_interval=heartbeat_interval,
+                session_expiry,
+                router=self.handler,
                 args=args,
                 kwargs=kwargs)
         else:
@@ -145,7 +138,7 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
             raise HTTPError(401, 'Forbidden')
 
         if not self.session.send_queue:
-            self._timeout = self.io_loop.add_timeout(
+            self._timeout = self.handler.io_loop.add_timeout(
                 time.time() + self._timeout_interval,
                 self._polling_timeout)
         else:
