@@ -115,7 +115,6 @@ Resources
 ^^^^^^^^^
 
 You're not limited with one connection type per server - you can serve different clients in one server instance.
-Different types of clients separated by resources.
 
 By default, all socket.io clients use same resource - 'socket.io'. You can change resource by passing `resource` parameter
 to the `get_router` function:
@@ -131,9 +130,34 @@ In the client, provide resource you're connecting to, by passing `resource` para
                resource: 'chat',
              });
 
-TornadIO also supports extra parameters passed through the URL. You can provide regexp in `extra_re` parameter
-and it will be accessible as `extra` parameter in your `on_open` in `kwargs` dictionary. For example:
+As it was said before, you can have as many connection types as you want by unique resources for each connection type:
 ::
+
+  ChatRouter = tornadio.get_router(ChatConnection, resource='chat')
+  PingRouter = tornadio.get_router(PingConnection, resource='ping')
+  MapRouter = tornadio.get_router(MapConnection, resource='map')
+
+  application = tornado.web.Application(
+    [ChatRouter.route(), PingRouter.route(), MapRouter.route()],
+    socket_io_port = 8000)
+
+Extra parameters
+^^^^^^^^^^^^^^^^
+
+If you need some kind of user authentication in your application, you have two choices:
+
+1. Send authentication token as a first message from the client
+2. Provide authentication token as part of the `resource` parameter
+
+TornadIO has support for extra data passed through the `socket.io` resources.
+
+You can provide regexp in `extra_re` parameter of the `get_router` function and matched data can be accessed
+in your `on_open` handler as `kwargs['extra']`. For example:
+::
+
+  class MyConnection(tornadio.SocketConnection):
+    def on_open(self, *args, **kwargs):
+      print 'Extra: %s' % kwargs['extra']
 
   ChatRouter = tornadio.get_router(MyConnection, resource='chat', extra_re='\d+', extra_sep='/')
 
@@ -142,11 +166,10 @@ and on the client-side:
 
   sock = new io.Socket(window.location.hostname, {
                port: 8001,
-               resource: 'chat/123123123',
+               resource: 'chat/123',
              });
 
-You might want to use this to avoid extra message sent from the client to authenticate user when establishing
-connection to the server.
+If you will run this example and connect with sample client, you should see 'Extra: 123' printed out.
 
 Starting Up
 -----------
