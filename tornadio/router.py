@@ -72,7 +72,6 @@ class SocketRouterBase(RequestHandler):
 
             protocol = PROTOCOLS.get(proto_name, None)
 
-            # TODO: Enabled transports configuration
             if protocol:
                 handler = protocol(self, session_id)
                 handler._execute(transforms, *extra, **kwargs)

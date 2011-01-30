@@ -17,8 +17,9 @@ class PollingSession(session.Session):
     messages, if there is on going GET connection - will pass cached/current
     messages to the actual transport protocol implementation.
     """
-    def __init__(self, session_id, expiry, connection, heartbeat_interval,
-                 *args, **kwargs):
+    def __init__(self, session_id, expiry,
+                 connection, heartbeat_interval,
+                 args, kwargs):
         # Initialize session
         super(PollingSession, self).__init__(session_id, expiry)
 

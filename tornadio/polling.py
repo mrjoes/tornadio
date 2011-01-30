@@ -42,10 +42,18 @@ class TornadioPollingHandlerBase(RequestHandler):
         Accepts handler and session_id (if available) and handles request.
         """
         self.handler = handler
+        self.session_id = session_id
+        self.session = None
 
-        # Decide what to do with the session - either create new or
-        # get one from the cache.
-        if not session_id:
+        super(TornadioPollingHandlerBase, self).__init__(handler.application,
+                                                         handler.request)
+
+    def _execute(self, transforms, *args, **kwargs):
+        # Initialize session either by creating new one or
+        # getting it from container
+        if not self.session_id:
+            handler = self.handler
+
             heartbeat_interval = handler.settings['heartbeat_interval']
             session_expiry = handler.settings['session_expiry']
 
@@ -53,16 +61,18 @@ class TornadioPollingHandlerBase(RequestHandler):
                 pollingsession.PollingSession,
                 expiry=session_expiry,
                 connection=handler.connection,
-                heartbeat_interval=heartbeat_interval)
+                heartbeat_interval=heartbeat_interval,
+                args=args,
+                kwargs=kwargs)
         else:
-            self.session = handler.sessions.get(session_id)
+            self.session = self.handler.sessions.get(self.session_id)
 
             if self.session is None or self.session.is_closed:
                 # TODO: Send back disconnect message?
                 raise HTTPError(401, 'Invalid session')
 
-        super(TornadioPollingHandlerBase, self).__init__(handler.application,
-                                                         handler.request)
+        super(TornadioPollingHandlerBase, self)._execute(transforms,
+                                                         *args, **kwargs)
 
     @asynchronous
     def get(self, *args, **kwargs):
@@ -159,8 +169,9 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         self.finish()
 
     def _detach(self):
-        self.session.remove_handler(self)
-        self.session = None
+        if self.session:
+            self.session.remove_handler(self)
+            self.session = None
 
     def on_connection_close(self):
         self._detach()
@@ -213,8 +224,9 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
         self.finish()
 
     def on_connection_close(self):
-        self.session.stop_heartbeat()
-        self.session.remove_handler(self)
+        if self.session:
+            self.session.stop_heartbeat()
+            self.session.remove_handler(self)
 
     def data_available(self, raw_data):
         self.preflight()
@@ -263,10 +275,10 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
         self.finish()
 
     def on_connection_close(self):
-        self.session.stop_heartbeat()
-        self.session.remove_handler(self)
+        if self.session:
+            self.session.stop_heartbeat()
+            self.session.remove_handler(self)
 
-    # TODO: Async
     def data_available(self, raw_data):
         self.write(
             '<script>parent.s_(%s),document);</script>' % json.dumps(raw_data)
@@ -293,7 +305,6 @@ class TornadioJSONPSocketHandler(TornadioXHRPollingSocketHandler):
         self._index = kwargs.get('jsonp_index', None)
         super(TornadioJSONPSocketHandler, self).post(*args, **kwargs)
 
-    # TODO: Async
     def data_available(self, raw_data):
         message = 'io.JSONP[%s]._(%s);' % (
             self._index,
