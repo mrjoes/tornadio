@@ -39,6 +39,7 @@ class SocketServer(HTTPServer):
         flash_policy_file = settings.get('flash_policy_file', None)
         flash_policy_port = settings.get('flash_policy_port', None)
         socket_io_port = settings.get('socket_io_port', 8001)
+        protocols = settings.get('enabled_protocols', dict())
 
         HTTPServer.__init__(self,
                             application,
@@ -52,7 +53,9 @@ class SocketServer(HTTPServer):
 
         self.listen(socket_io_port)
 
-        if flash_policy_file is not None and flash_policy_port is not None:
+        if (flash_policy_file is not None
+            and flash_policy_port is not None
+            and 'flashsocket' in protocols):
             logging.info('Starting Flash Policy Server on Port \'%s\'',
                          flash_policy_port)
 
