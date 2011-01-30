@@ -20,7 +20,7 @@ except:
 
 setup(
     name='TornadIO',
-    version=tornadio.version,
+    version='%s.%s.%s' % tornadio.__version__,
     author='Serge S. Koval',
     author_email='serge.koval@gmail.com',
     packages=['tornadio'],
