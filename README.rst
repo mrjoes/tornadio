@@ -130,7 +130,7 @@ In the client, provide resource you're connecting to, by passing `resource` para
                resource: 'chat',
              });
 
-As it was said before, you can have as many connection types as you want by unique resources for each connection type:
+As it was said before, you can have as many connection types as you want by having unique resources for each connection type:
 ::
 
   ChatRouter = tornadio.get_router(ChatConnection, resource='chat')
