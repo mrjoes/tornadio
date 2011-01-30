@@ -39,7 +39,6 @@ class SocketServer(HTTPServer):
         flash_policy_file = settings.get('flash_policy_file', None)
         flash_policy_port = settings.get('flash_policy_port', None)
         socket_io_port = settings.get('socket_io_port', 8001)
-        protocols = settings.get('enabled_protocols', dict())
 
         HTTPServer.__init__(self,
                             application,
@@ -53,14 +52,15 @@ class SocketServer(HTTPServer):
 
         self.listen(socket_io_port)
 
-        if (flash_policy_file is not None
-            and flash_policy_port is not None
-            and 'flashsocket' in protocols):
-            logging.info('Starting Flash Policy Server on Port \'%s\'',
-                         flash_policy_port)
+        if flash_policy_file is not None and flash_policy_port is not None:
+            try:
+                logging.info('Starting Flash policy server on port \'%d\'',
+                             flash_policy_port)
 
-            flash_policy = FlashPolicyServer(port=flash_policy_port,
-                                             policy_file=flash_policy_file)
+                flash_policy = FlashPolicyServer(port=flash_policy_port,
+                                                 policy_file=flash_policy_file)
+            except Exception, ex:
+                logging.error('Failed to start Flash policy server: %s', ex)
 
         io_loop = io_loop or ioloop.IOLoop.instance()
         logging.info('Entering IOLoop...')
