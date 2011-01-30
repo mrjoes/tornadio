@@ -6,6 +6,7 @@ except ImportError:
     from distribute_setup import use_setuptools
     use_setuptools()
     from setuptools import setup, find_packages
+import tornadio
 
 try:
     license = open('LICENSE').read()
@@ -19,7 +20,7 @@ except:
 
 setup(
     name='TornadIO',
-    version='0.0.1',
+    version=tornadio.version,
     author='Serge S. Koval',
     author_email='serge.koval@gmail.com',
     packages=['tornadio'],
