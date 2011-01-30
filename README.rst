@@ -68,15 +68,15 @@ If you're familiar with Tornado, do following to add support for Socket.IO to yo
 Goodies
 -------
 
-``SocketConnection`` class implements three overridable methods:
+``SocketConnection`` class provides three overridable methods:
 
 1. ``on_open`` called when new client connection was established.
 2. ``on_message`` called when message was received from the client. If client sent JSON object,
    it will be automatically decoded into appropriate Python data structures.
-3. ``on_close`` called when client connection was closed (due to network error or timeout)
+3. ``on_close`` called when client connection was closed (due to network error, timeout or just client-side disconnect)
 
 
-Each ``SocketConnection`` has ``send()`` method which is used to send data to this client. Input parameter
+Each ``SocketConnection`` has ``send()`` method which is used to send data to the client. Input parameter
 can be one of the:
 
 1. String/unicode string - sent as is (though with utf-8 encoding)
@@ -111,6 +111,43 @@ You can configure your handler by passing settings to the ``get_router`` functio
 -  **xhr_polling_timeout**: Timeout for long running XHR connection for *xhr-polling* transport, in seconds. If no
    data was available during this time, connection will be closed on server side to avoid client-side timeouts.
 
+Resources
+^^^^^^^^^
+
+You're not limited with one connection type per server - you can serve different clients in one server instance.
+Different types of clients separated by resources.
+
+By default, all socket.io clients use same resource - 'socket.io'. You can change resource by passing `resource` parameter
+to the `get_router` function:
+::
+
+  ChatRouter = tornadio.get_router(MyConnection, resource='chat')
+
+In the client, provide resource you're connecting to, by passing `resource` parameter to `io.Socket` constructor:
+::
+
+  sock = new io.Socket(window.location.hostname, {
+               port: 8001,
+               resource: 'chat',
+             });
+
+TornadIO also supports extra parameters passed through the URL. You can provide regexp in `extra_re` parameter
+and it will be accessible as `extra` parameter in your `on_open` in `kwargs` dictionary. For example:
+::
+
+  ChatRouter = tornadio.get_router(MyConnection, resource='chat', extra_re='\d+', extra_sep='/')
+
+and on the client-side:
+::
+
+  sock = new io.Socket(window.location.hostname, {
+               port: 8001,
+               resource: 'chat/123123123',
+             });
+
+You might want to use this to avoid extra message sent from the client to authenticate user when establishing
+connection to the server.
+
 Starting Up
 -----------
 
@@ -118,12 +155,14 @@ Best Way: SocketServer
 ^^^^^^^^^^^^^^^^^^^^^^
 
 We provide customized version (shamelessly borrowed from the SocketTornad.IO library) of the HttpServer, which
-simplifies start of the your TornadIO server.
+simplifies start of your TornadIO server.
 
 To start it, do following (assuming you created application object before)::
 
   if __name__ == "__main__":
     socketio_server = SocketServer(application)
+
+SocketServer will automatically start Flash policy server, if required.
 
 Examples
 --------
