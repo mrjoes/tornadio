@@ -23,18 +23,13 @@ class TornadioWebSocketHandler(WebSocketHandler):
 
         self.handler = handler
 
-        # Create connection instance
-        heartbeat_interval = handler.settings['heartbeat_interval']
-        self.connection = handler.connection(self, heartbeat_interval)
-
         super(TornadioWebSocketHandler, self).__init__(handler.application,
                                                        handler.request)
 
     # HAProxy websocket fix.
-    # Merged from: https://github.com/facebook/tornado/commit/86bd681ff841f272c5205f24cd2a613535ed2e00
+    # Merged from:
+    # https://github.com/facebook/tornado/commit/86bd681ff841f272c5205f24cd2a613535ed2e00
     def _execute(self, transforms, *args, **kwargs):
-        super(TornadioWebSocketHandler, self)._execute(transforms, *args, **kwargs)
-
         # Next Tornado will have the built-in support for HAProxy
         if tornado.version_info <= (1,1,0):
             # Write the initial headers before attempting to read the challenge.
@@ -53,6 +48,10 @@ class TornadioWebSocketHandler(WebSocketHandler):
                         host=self.request.host,
                         path=self.request.path)))
 
+        super(TornadioWebSocketHandler, self)._execute(transforms, *args,
+                                                       **kwargs)
+
+
     def _write_response(self, challenge):
         if tornado.version_info <= (1,1,0):
             self.stream.write("%s" % challenge)
@@ -62,6 +61,11 @@ class TornadioWebSocketHandler(WebSocketHandler):
             super(TornadioWebSocketHandler, self)._write_response(challenge)
 
     def open(self, *args, **kwargs):
+        # Create connection instance
+        heartbeat_interval = self.handler.settings['heartbeat_interval']
+        self.connection = self.handler.connection(self, heartbeat_interval)
+
+        # Initialize heartbeats
         self.connection.reset_heartbeat()
 
         # Fix me: websocket is dropping connection if we don't send first
