@@ -18,13 +18,13 @@ from tornadio import proto
 class TornadioWebSocketHandler(WebSocketHandler):
     """WebSocket handler.
     """
-    def __init__(self, handler, session_id):
+    def __init__(self, router, session_id):
         logging.debug('Initializing WebSocket handler...')
 
-        self.handler = handler
+        self.router = router
 
-        super(TornadioWebSocketHandler, self).__init__(handler.application,
-                                                       handler.request)
+        super(TornadioWebSocketHandler, self).__init__(router.application,
+                                                       router.request)
 
     # HAProxy websocket fix.
     # Merged from:
@@ -62,10 +62,10 @@ class TornadioWebSocketHandler(WebSocketHandler):
 
     def open(self, *args, **kwargs):
         # Create connection instance
-        heartbeat_interval = self.handler.settings['heartbeat_interval']
-        self.connection = self.handler.connection(self,
-                                                  self.handler.io_loop,
-                                                  heartbeat_interval)
+        heartbeat_interval = self.router.settings['heartbeat_interval']
+        self.connection = self.router.connection(self,
+                                                 self.router.io_loop,
+                                                 heartbeat_interval)
 
         # Initialize heartbeats
         self.connection.reset_heartbeat()
@@ -90,7 +90,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
         self.connection.delay_heartbeat()
 
 class TornadioFlashSocketHandler(TornadioWebSocketHandler):
-    def __init__(self, handler, session_id):
+    def __init__(self, router, session_id):
         logging.debug('Initializing FlashSocket handler...')
 
-        super(TornadioFlashSocketHandler, self).__init__(handler, session_id)
+        super(TornadioFlashSocketHandler, self).__init__(router, session_id)

@@ -15,7 +15,7 @@ import socket
 import errno
 import functools
 
-from tornado import ioloop, iostream
+from tornado import iostream
 
 class FlashPolicyServer(object):
     """Flash Policy server, listens on port 843 by default (useless otherwise)
@@ -39,8 +39,8 @@ class FlashPolicyServer(object):
         while True:
             try:
                 connection, address = sock.accept()
-            except socket.error, e:
-                if e[0] not in (errno.EWOULDBLOCK, errno.EAGAIN):
+            except socket.error, ex:
+                if ex[0] not in (errno.EWOULDBLOCK, errno.EAGAIN):
                     raise
                 return
             connection.setblocking(0)

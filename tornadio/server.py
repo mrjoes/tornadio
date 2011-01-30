@@ -59,7 +59,7 @@ class SocketServer(HTTPServer):
                 logging.info('Starting Flash policy server on port \'%d\'',
                              flash_policy_port)
 
-                flash_policy = FlashPolicyServer(
+                FlashPolicyServer(
                     io_loop = io_loop,
                     port=flash_policy_port,
                     policy_file=flash_policy_file)

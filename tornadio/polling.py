@@ -33,32 +33,33 @@ class TornadioPollingHandlerBase(RequestHandler):
     6. If there were no GET requests for more than 15 seconds (default), virtual
     connection will be closed - session entry will expire
     """
-    def __init__(self, handler, session_id):
+    def __init__(self, router, session_id):
         """Default constructor.
 
-        Accepts handler and session_id (if available) and handles request.
+        Accepts router instance and session_id (if available) and handles
+        request.
         """
-        self.handler = handler
+        self.router = router
         self.session_id = session_id
         self.session = None
 
-        super(TornadioPollingHandlerBase, self).__init__(handler.application,
-                                                         handler.request)
+        super(TornadioPollingHandlerBase, self).__init__(router.application,
+                                                         router.request)
 
     def _execute(self, transforms, *args, **kwargs):
         # Initialize session either by creating new one or
         # getting it from container
         if not self.session_id:
-            session_expiry = self.handler.settings['session_expiry']
+            session_expiry = self.router.settings['session_expiry']
 
-            self.session = self.handler.sessions.create(
+            self.session = self.router.sessions.create(
                 pollingsession.PollingSession,
                 session_expiry,
-                router=self.handler,
+                router=self.router,
                 args=args,
                 kwargs=kwargs)
         else:
-            self.session = self.handler.sessions.get(self.session_id)
+            self.session = self.router.sessions.get(self.session_id)
 
             if self.session is None or self.session.is_closed:
                 # TODO: Send back disconnect message?
@@ -122,12 +123,12 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
     2. When new data is available on server-side, it will be sent through the
     open GET connection or cached otherwise.
     """
-    def __init__(self, handler, session_id):
+    def __init__(self, router, session_id):
         self._timeout = None
 
-        self._timeout_interval = handler.settings['xhr_polling_timeout']
+        self._timeout_interval = router.settings['xhr_polling_timeout']
 
-        super(TornadioXHRPollingSocketHandler, self).__init__(handler,
+        super(TornadioXHRPollingSocketHandler, self).__init__(router,
                                                               session_id)
 
     @asynchronous
@@ -138,7 +139,7 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
             raise HTTPError(401, 'Forbidden')
 
         if not self.session.send_queue:
-            self._timeout = self.handler.io_loop.add_timeout(
+            self._timeout = self.router.io_loop.add_timeout(
                 time.time() + self._timeout_interval,
                 self._polling_timeout)
         else:
@@ -283,10 +284,10 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
 class TornadioJSONPSocketHandler(TornadioXHRPollingSocketHandler):
     """JSONP protocol implementation.
     """
-    def __init__(self, handler, session_id):
+    def __init__(self, router, session_id):
         self._index = None
 
-        super(TornadioJSONPSocketHandler, self).__init__(handler, session_id)
+        super(TornadioJSONPSocketHandler, self).__init__(router, session_id)
 
     @asynchronous
     def get(self, *args, **kwargs):
