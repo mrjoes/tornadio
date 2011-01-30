@@ -9,7 +9,7 @@
     :license: Apache, see LICENSE for more details.
 """
 
-version_info = (0,0,2)
+version_info = (0, 0, 2)
 version = '%d.%d.%d' % version_info
 
 from tornadio.conn import SocketConnection
