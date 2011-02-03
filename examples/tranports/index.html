@@ -7,7 +7,6 @@
   <script>
     $(function() {
       var sock = null;
-
       function log(msg) {
         var control = $('#log');
         control.html(control.html() + msg + '<br/>');
@@ -17,15 +16,13 @@
       function connect() {
         disconnect();
 
-        transports = [];
-
-        selected = $('#protocols input:checked').each(function() {
-          transports.push($(this).attr('id'));
+        var transports = $('#protocols input:checked').map(function(){
+            return $(this).attr('id');
         });
 
-        sock = new io.Socket(window.location.hostname, {
+        sock = new io.Socket(null, {
                   port: 8001,
-                  transports:transports,
+                  transports: transports,
                   rememberTransport: false
                });
         sock.connect();
