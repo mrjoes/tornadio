@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    tornadio.router
-    ~~~~~~~~~~~~~~~
+    tornadio.session
+    ~~~~~~~~~~~~~~~~
 
     Simple heapq-based session implementation with sliding expiration window
     support.
