@@ -187,6 +187,31 @@ To start it, do following (assuming you created application object before)::
 
 SocketServer will automatically start Flash policy server, if required.
 
+Going big
+---------
+
+So, you've finished writting your application and want to share it with rest of the world, so you started
+thinking about scalability, deployment options, etc.
+
+Most of the Tornado servers are deployed behind the nginx, which also used to serve static content. This
+won't work very well with TornadIO, as nginx does not support HTTP/1.1, does not support websockets and
+XHR-Multipart transport just won't work.
+
+So, to load balance your TornadIO instances, use alternative solutions like `HAProxy <http://haproxy.1wt.eu/>`_.
+However, HAProxy does not work on Windows, so if you plan to deploy your solution on Windows platform,
+you might want to take look into `MLB <http://support.microsoft.com/kb/240997>`_.
+
+Scalability is completely different beast. It is up for you, as a developer, to design scalable architecture
+of the application.
+
+For example, if you need to have one large virtual server out of your multiple physical processes (or even servers),
+you have to come up with some kind of the synchronization mechanism. This can be either common meeting point
+(and also point of failure), like memcached, redis, etc. Or you might want to use some transporting mechanism to
+communicate between servers, for example something `AMQP <http://www.amqp.org/>`_ based, `ZeroMQ <zeromq.org>`_ or
+just plain sockets with your protocol.
+
+For example, with message queues, you can treat TornadIO as a message gateway between your clients and your server backend(s).
+
 Examples
 --------
 
