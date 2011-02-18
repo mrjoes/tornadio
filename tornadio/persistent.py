@@ -31,7 +31,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
     # https://github.com/facebook/tornado/commit/86bd681ff841f272c5205f24cd2a613535ed2e00
     def _execute(self, transforms, *args, **kwargs):
         # Next Tornado will have the built-in support for HAProxy
-        if tornado.version_info <= (1, 1, 0):
+        if tornado.version_info <= (1, 2, 0):
             # Write the initial headers before attempting to read the challenge.
             # This is necessary when using proxies (such as HAProxy),
             # need to see the Upgrade headers before passing through the
@@ -53,7 +53,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
 
 
     def _write_response(self, challenge):
-        if tornado.version_info <= (1, 1, 0):
+        if tornado.version_info <= (1, 2, 0):
             self.stream.write("%s" % challenge)
             self.async_callback(self.open)(*self.open_args, **self.open_kwargs)
             self._receive_message()
