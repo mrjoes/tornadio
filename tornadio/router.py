@@ -123,7 +123,6 @@ class SocketRouterBase(RequestHandler):
         # Initialize sessions
         cls._sessions = session.SessionContainer()
 
-        # TODO: Add support for configurable ioloop instance?
         check_interval = settings['session_check_interval'] * 1000
         cls._sessions_cleanup = ioloop.PeriodicCallback(cls._sessions.expire,
                                                         check_interval,
@@ -150,7 +149,7 @@ class SocketRouterBase(RequestHandler):
                       cls)
 
 def get_router(handler, settings=None, resource='socket.io/*',
-               extra_re=None, extra_sep=None):
+               io_loop=None, extra_re=None, extra_sep=None):
     """Create new router class with desired properties.
 
     Use this function to create new socket.io server. For example:
@@ -164,5 +163,6 @@ def get_router(handler, settings=None, resource='socket.io/*',
        application = tornado.web.Application([PongRouter.route()])
     """
     router = type('SocketRouter', (SocketRouterBase,), {})
-    router.tornadio_initialize(handler, settings, resource, extra_re, extra_sep)
+    router.tornadio_initialize(handler, settings, resource,
+                               io_loop, extra_re, extra_sep)
     return router

@@ -114,9 +114,11 @@ class PollingSession(session.Session):
         """Forcibly close connection and notify connection object about that.
         """
         if not self.connection.is_closed:
-            # Notify that connection was closed
-            self.connection.on_close()
-            self.connection.is_closed = True
+            try:
+                # Notify that connection was closed
+                self.connection.on_close()
+            finally:
+                self.connection.is_closed = True
 
     @property
     def is_closed(self):
