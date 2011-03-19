@@ -39,6 +39,7 @@ class SocketServer(HTTPServer):
         flash_policy_file = settings.get('flash_policy_file', None)
         flash_policy_port = settings.get('flash_policy_port', None)
         socket_io_port = settings.get('socket_io_port', 8001)
+        socket_io_address = settings.get('socket_io_address', '')
 
         io_loop = io_loop or ioloop.IOLoop.instance()
 
@@ -52,7 +53,7 @@ class SocketServer(HTTPServer):
         logging.info('Starting up tornadio server on port \'%s\'',
                      socket_io_port)
 
-        self.listen(socket_io_port)
+        self.listen(socket_io_port, socket_io_address)
 
         if flash_policy_file is not None and flash_policy_port is not None:
             try:
