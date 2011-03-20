@@ -43,7 +43,7 @@ class PollingSession(session.Session):
         self.send(session_id)
 
         # Notify that channel was opened
-        self.on_open(self.request, *args, **kwargs)
+        self.on_open(router.request, *args, **kwargs)
 
     def on_delete(self, forced):
         """Called by the session management class when item is
