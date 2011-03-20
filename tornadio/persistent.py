@@ -74,7 +74,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
         # message
         self.send('no_session')
 
-        self.connection.on_open(*args, **kwargs)
+        self.connection.on_open(self.request, *args, **kwargs)
 
     def on_message(self, message):
         self.async_callback(self.connection.raw_message)(message)

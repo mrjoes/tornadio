@@ -15,8 +15,12 @@ class IndexHandler(tornado.web.RequestHandler):
         self.render("index.html")
 
 class PingConnection(tornadio.SocketConnection):
+    def on_open(self, request, *args, **kwargs):
+        self.ip = request.remote_ip
+
     def on_message(self, message):
         message['server'] = str(datetime.now())
+        message['ip'] = self.ip
         self.send(message)
 
 #use the routes classmethod to build the correct resource

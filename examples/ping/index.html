@@ -29,7 +29,8 @@
                      'Server: ' + getPrintableDate(server) + '<br/>' +
                      'Delta:  ' + (now.getTime() - ping.getTime()).toString() + '<br/>' +
                      'SrDelta:' + (server.getTime() - ping.getTime()).toString() + '<br/>' +
-                     'Message:' + data.text
+                     'Message:' + data.text + '<br/>' +
+                     'Remote IP:' + data.ip
        );
 
       //sendPing();
