@@ -51,6 +51,7 @@ class SocketConnection(object):
         # Initialize heartbeats
         self._heartbeat_timer = None
         self._heartbeats = 0
+        self._missed_heartbeats = 0
         self._heartbeat_delay = None
         self._heartbeat_interval = heartbeat_interval * 1000
 
@@ -90,6 +91,7 @@ class SocketConnection(object):
             elif msg[0] == proto.HEARTBEAT:
                 # TODO: Verify incoming heartbeats
                 logging.debug('Incoming Heartbeat')
+                self._missed_heartbeats -= 1
 
     # Heartbeat management
     def reset_heartbeat(self, interval=None):
@@ -119,6 +121,7 @@ class SocketConnection(object):
     def send_heartbeat(self):
         """Send heartbeat message to the client"""
         self._heartbeats += 1
+        self._missed_heartbeats += 1
         self.send('~h~%d' % self._heartbeats)
 
     def _heartbeat(self):
@@ -131,4 +134,8 @@ class SocketConnection(object):
 
         logging.debug('Sending heartbeat')
 
-        self.send_heartbeat()
+        if self._missed_heartbeats > 5:
+            logging.debug('Missed too many heartbeats')
+            self.close()
+        else:
+            self.send_heartbeat()
