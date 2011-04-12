@@ -14,6 +14,7 @@ try:
 except ImportError:
     import json
 
+from urllib import unquote
 from tornado.web import RequestHandler, HTTPError, asynchronous
 
 from tornadio import pollingsession
@@ -155,7 +156,19 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         if not self.preflight():
             raise HTTPError(401, 'unauthorized')
 
-        data = self.get_argument('data')
+        # Special case for IE XDomainRequest
+        ctype = self.request.headers.get("Content-Type", "").split(";")[0]
+        if ctype == '':
+            data = None
+            body = self.request.body
+
+            if body.startswith('data='):
+                data = unquote(body[5:])
+        else:
+            data = self.get_argument('data', None)
+
+        print data
+
         self.async_callback(self.session.raw_message)(data)
 
         self.set_header('Content-Type', 'text/plain')
