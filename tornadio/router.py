@@ -130,7 +130,7 @@ class SocketRouterBase(RequestHandler):
 
         # Copied from SocketTornad.IO with minor formatting
         if extra_re:
-            if extra_re[0] != '(?P<extra>':
+            if not extra_re.startswith('(?P<extra>'):
                 extra_re = r'(?P<extra>%s)' % extra_re
             if extra_sep:
                 extra_re = extra_sep + extra_re
