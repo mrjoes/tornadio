@@ -167,8 +167,6 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
         else:
             data = self.get_argument('data', None)
 
-        print data
-
         self.async_callback(self.session.raw_message)(data)
 
         self.set_header('Content-Type', 'text/plain')
