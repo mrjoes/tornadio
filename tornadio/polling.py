@@ -235,7 +235,7 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
 
     def data_available(self, raw_data):
         self.preflight()
-        self.write("Content-Type: text/plain; charset=us-ascii\n\n")
+        self.write("Content-Type: text/plain; charset=UTF-8\n\n")
         self.write(raw_data + '\n')
         self.write('--socketio\n')
         self.flush()
