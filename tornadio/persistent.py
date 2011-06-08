@@ -22,6 +22,7 @@ class TornadioWebSocketHandler(WebSocketHandler):
         logging.debug('Initializing WebSocket handler...')
 
         self.router = router
+        self.connection = None
 
         super(TornadioWebSocketHandler, self).__init__(router.application,
                                                        router.request)
@@ -80,11 +81,12 @@ class TornadioWebSocketHandler(WebSocketHandler):
         self.async_callback(self.connection.raw_message)(message)
 
     def on_close(self):
-        try:
-            self.connection.on_close()
-        finally:
-            self.connection.is_closed = True
-            self.connection.stop_heartbeat()
+        if self.connection is not None:
+            try:
+                self.connection.on_close()
+            finally:
+                self.connection.is_closed = True
+                self.connection.stop_heartbeat()
 
     def send(self, message):
         self.write_message(proto.encode(message))
