@@ -137,12 +137,12 @@ class SocketRouterBase(RequestHandler):
         else:
             extra_re = "(?P<extra>)"
 
-        proto_re = "(%s)" % "|".join(PROTOCOLS.keys())
+        proto_re = "|".join(PROTOCOLS.keys())
 
         cls._route = (r"/(?P<resource>%s)%s/"
                       "(?P<protocol>%s)/?"
                       "(?P<session_id>[0-9a-zA-Z]*)/?"
-                      "((?P<protocol_init>\d*?)|(?P<xhr_path>\w*?))/?"
+                      "(?P<protocol_init>\d*?)|(?P<xhr_path>\w*?)/?"
                       "(?P<jsonp_index>\d*?)" % (resource,
                                                  extra_re,
                                                  proto_re),
