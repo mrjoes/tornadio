@@ -311,8 +311,6 @@ class TornadioJSONPSocketHandler(TornadioXHRPollingSocketHandler):
 
     def data_available(self, raw_data):
         if not self._index:
-
-
             raise HTTPError(401, 'unauthorized')
 
         message = 'io.JSONP[%s]._(%s);' % (
