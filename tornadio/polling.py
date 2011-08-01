@@ -253,7 +253,6 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
     @asynchronous
     def get(self, *args, **kwargs):
         if not self.session.set_handler(self):
-            # TODO: Error logging
             raise HTTPError(401, 'Forbidden')
 
         self.set_header('Content-Type', 'text/html')
@@ -311,6 +310,11 @@ class TornadioJSONPSocketHandler(TornadioXHRPollingSocketHandler):
         super(TornadioJSONPSocketHandler, self).post(*args, **kwargs)
 
     def data_available(self, raw_data):
+        if not self._index:
+
+
+            raise HTTPError(401, 'unauthorized')
+
         message = 'io.JSONP[%s]._(%s);' % (
             self._index,
             json.dumps(raw_data)

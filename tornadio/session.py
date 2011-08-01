@@ -81,9 +81,8 @@ class SessionContainer(object):
         session = self._items.get(session_id, None)
 
         if session is not None:
-            self._items[session].promoted = -1
+            session.promoted = -1
             session.on_delete(True)
-            del self._items[session_id]
             return True
 
         return False
