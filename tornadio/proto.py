@@ -10,8 +10,16 @@
 """
 try:
     import simplejson as json
+    json_decimal_args = {"use_decimal":True}
 except ImportError:
     import json
+    import decimal
+    class DecimalEncoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, decimal.Decimal):
+                return float(o)
+            return super(DecimalEncoder, self).default(o)
+    json_decimal_args = {"cls":DecimalEncoder}
 
 FRAME = '~m~'
 HEARTBEAT = '~h~'
@@ -32,7 +40,7 @@ def encode(message):
     elif (not isinstance(message, (unicode, str))
           and isinstance(message, (object, dict))):
         if message is not None:
-            encoded += encode('~j~' + json.dumps(message, use_decimal=True))
+            encoded += encode('~j~' + json.dumps(message, **json_decimal_args))
     else:
         msg = message.encode('utf-8')
         encoded += "%s%d%s%s" % (FRAME, len(msg), FRAME, msg)
