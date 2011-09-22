@@ -169,7 +169,7 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
 
         self.async_callback(self.session.raw_message)(data)
 
-        self.set_header('Content-Type', 'text/plain')
+        self.set_header('Content-Type', 'text/plain; charset=UTF-8')
         self.write('ok')
         self.finish()
 
@@ -183,8 +183,8 @@ class TornadioXHRPollingSocketHandler(TornadioPollingHandlerBase):
 
     def data_available(self, raw_data):
         self.preflight()
-        self.set_header("Content-Type", "text/plain; charset=UTF-8")
-        self.set_header("Content-Length", len(raw_data))
+        self.set_header('Content-Type', 'text/plain; charset=UTF-8')
+        self.set_header('Content-Length', len(raw_data))
         self.write(raw_data)
         self.finish()
 
@@ -206,7 +206,7 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
             raise HTTPError(401, 'Forbidden')
 
         self.set_header('Content-Type',
-                        'multipart/x-mixed-replace;boundary="socketio"')
+                        'multipart/x-mixed-replace;boundary="socketio; charset=UTF-8"')
         self.set_header('Connection', 'keep-alive')
         self.write('--socketio\n')
 
@@ -224,7 +224,7 @@ class TornadioXHRMultipartSocketHandler(TornadioPollingHandlerBase):
         data = self.get_argument('data')
         self.async_callback(self.session.raw_message)(data)
 
-        self.set_header('Content-Type', 'text/plain')
+        self.set_header('Content-Type', 'text/plain; charset=UTF-8')
         self.write('ok')
         self.finish()
 
@@ -255,7 +255,7 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
         if not self.session.set_handler(self):
             raise HTTPError(401, 'Forbidden')
 
-        self.set_header('Content-Type', 'text/html')
+        self.set_header('Content-Type', 'text/html; charset=UTF-8')
         self.set_header('Connection', 'keep-alive')
         self.set_header('Transfer-Encoding', 'chunked')
         self.write('<html><body>%s' % (' ' * 244))
@@ -274,7 +274,7 @@ class TornadioHtmlFileSocketHandler(TornadioPollingHandlerBase):
         data = self.get_argument('data')
         self.async_callback(self.session.raw_message)(data)
 
-        self.set_header('Content-Type', 'text/plain')
+        self.set_header('Content-Type', 'text/plain; charset=UTF-8')
         self.write('ok')
         self.finish()
 
