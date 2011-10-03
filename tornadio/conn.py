@@ -79,7 +79,9 @@ class SocketConnection(object):
         self._protocol.send(message)
 
     def close(self):
-        """Focibly close client connection"""
+        """Focibly close client connection.
+        Stop heartbeats as well, as they would cause IOErrors once the connection is closed."""
+        self.stop_heartbeat()
         self._protocol.close()
 
     def raw_message(self, message):
