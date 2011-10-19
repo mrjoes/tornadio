@@ -45,4 +45,5 @@ class Callback(object):
         except:
             logging.error("Error in periodic callback", exc_info=True)
 
-        self.start(next_call)
+        if self._running:
+            self.start(next_call)
