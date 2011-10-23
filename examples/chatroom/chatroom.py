@@ -30,15 +30,18 @@ class ChatConnection(tornadio.SocketConnection):
             p.send("A user has left.")
 
 #use the routes classmethod to build the correct resource
-ChatRouter = tornadio.get_router(ChatConnection)
+ChatRouter = tornadio.get_router(ChatConnection, {
+    'enabled_protocols': [
+        'websocket',
+        'flashsocket',
+        'xhr-multipart',
+        'xhr-polling'
+    ]
+})
 
 #configure the Tornado application
 application = tornado.web.Application(
     [(r"/", IndexHandler), ChatRouter.route()],
-    enabled_protocols = ['websocket',
-                         'flashsocket',
-                         'xhr-multipart',
-                         'xhr-polling'],
     flash_policy_port = 843,
     flash_policy_file = op.join(ROOT, 'flashpolicy.xml'),
     socket_io_port = 8001
