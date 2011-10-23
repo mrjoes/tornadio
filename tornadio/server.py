@@ -25,7 +25,8 @@ class SocketServer(HTTPServer):
 
     def __init__(self, application,
                  no_keep_alive=False, io_loop=None,
-                 xheaders=False, ssl_options=None
+                 xheaders=False, ssl_options=None, 
+                 auto_start=True
                  ):
         """Initializes the server with the given request callback.
 
@@ -67,5 +68,9 @@ class SocketServer(HTTPServer):
             except Exception, ex:
                 logging.error('Failed to start Flash policy server: %s', ex)
 
-        logging.info('Entering IOLoop...')
-        io_loop.start()
+        # Set auto_start to False in order to have opportunities 
+        # to work with server object and/or perform some actions 
+        # after server already created but before ioloop will start 
+        if auto_start:
+            logging.info('Entering IOLoop...')
+            io_loop.start()
