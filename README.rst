@@ -187,6 +187,14 @@ To start it, do following (assuming you created application object before)::
 
 SocketServer will automatically start Flash policy server, if required.
 
+SocketServer by default will also automatically start ioloop. In order to prevent this behaviour and perform some additional action after socket server is created you can use auto_start param. In this case you should start ioloop manually.
+
+  if __name__ == "__main__":
+    socketio_server = SocketServer(application, auto_start=False)
+    logging.info('You can perform some actions here')
+    ioloop.IOLoop.instance().start()
+
+
 Going big
 ---------
 

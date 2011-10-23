@@ -70,7 +70,7 @@ class SocketServer(HTTPServer):
 
         # Set auto_start to False in order to have opportunities 
         # to work with server object and/or perform some actions 
-        # after server already created but before ioloop will start.
+        # after server is already created but before ioloop will start.
         # Attention: if you use auto_start param set to False 
         # you should start ioloop manually
         if auto_start:
