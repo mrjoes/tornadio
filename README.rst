@@ -2,7 +2,7 @@
 Tornadio
 ========
 
-If you're looking for socket.io 0.7+ integration library, check `TornadIO2 <https://github.com/MrJoes/tornadio2>`
+If you're looking for socket.io 0.7+ integration library, check `TornadIO2 <https://github.com/MrJoes/tornadio2>`_
 
 Contributors
 ------------
