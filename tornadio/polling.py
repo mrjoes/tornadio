@@ -96,8 +96,7 @@ class TornadioPollingHandlerBase(RequestHandler):
                 self.set_header('Access-Control-Allow-Origin',
                                 self.request.headers['Origin'])
 
-                if self.request.headers.has_key('Cookie'):
-                    self.set_header('Access-Control-Allow-Credentials', True)
+                self.set_header('Access-Control-Allow-Credentials', 'true')
 
                 return True
             else:
